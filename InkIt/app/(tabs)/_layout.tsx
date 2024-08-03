@@ -17,7 +17,7 @@ const TabsLayout = () => {
       borderTopColor: "#232533",
       height: 84,
     },
-      tabBarActiveTintColor: "red",
+      tabBarActiveTintColor: "#990000",
       tabBarInactiveTintColor: "#CDCDE0", }}>
       <Tabs.Screen 
         name="home"

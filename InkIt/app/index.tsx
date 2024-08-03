@@ -1,6 +1,6 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Text, View, StyleSheet, Image, Button } from "react-native";
 import { StatusBar } from "react-native";
-import { Link } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
@@ -13,7 +13,9 @@ export default function App() {
         style={styles.image}
       />
       <StatusBar/>
-      <Link href = "/home" style = {{color: 'red', fontFamily:'courier'}}>Go to home</Link>
+      <Button title = "Login" color = "white"  onPress={()=>router.push("/SignIn")}/>
+      <Button title = "Sign Up" color = "white" onPress={()=>router.push("/SignUp")}/>
+      
     </SafeAreaView>
   );
 }
