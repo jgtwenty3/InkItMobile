@@ -1,17 +1,40 @@
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, Alert} from 'react-native';
 import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
 import FormField from '@/components/FormField';
+import { createUser } from '@/lib/appwrite';
+
 
 const SignUp = () => {
+
+  // const { setUser, setIsLogged } = useGlobalContext();
+
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    username: '',
-    email: '',
-    password: '',
+    username: "",
+    email: "",
+    password: "",
   });
+
+  const submit = async () => {
+    if (form.username === "" || form.email === "" || form.password === "") {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await createUser(form.email, form.password, form.username);
+      
+
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,16 +68,14 @@ const SignUp = () => {
             otherStyles={styles.mt7}
           />
           <CustomButton
-            title="Sign Up"
-            onPress={() => {
-              // Add your sign-up logic here
-            }}
+            title="sign up"
+            onPress={submit}
             buttonStyle={styles.customButton}
             textStyle={styles.customButtonText}
             isLoading={isSubmitting}
           />
           <CustomButton
-            title="Already have an account?"
+            title="already have an account?"
             onPress={() => router.push('/SignIn')}
             buttonStyle={styles.mt20}
             textStyle={styles.customButtonText}

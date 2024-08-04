@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Button, TextInput, Image} from 'react-native'
+import { StyleSheet, Text, View, Button, TextInput, Image, Alert} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '@/components/FormField'
 import { router } from 'expo-router'
 import CustomButton from '@/components/CustomButton'
+import { getCurrentUser,signIn } from '@/lib/appwrite'
 
 const SignIn = () => {
 
@@ -14,13 +15,35 @@ const SignIn = () => {
     password: "",
   });
 
+  const submit = async () => {
+    if (form.email === "" || form.password === "") {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+
+    setSubmitting(true);
+
+    try {
+      await signIn(form.email, form.password);
+      const result = await getCurrentUser();
+      // setUser(result);
+      // setIsLogged(true);
+
+      Alert.alert("Success", "User signed in successfully");
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <SafeAreaView style ={styles.container}>
       <Image 
         source={require('../../assets/images/inkit.png')}
         style={styles.image}
       />
-      <Text style ={styles.text}>log in to Ink It</Text>
+      
       <FormField
             title="Email"
             value={form.email}
@@ -34,6 +57,11 @@ const SignIn = () => {
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles="mt-7"
+          />
+           <CustomButton
+            title="log in"
+            onPress={submit}
+            
           />
          <CustomButton
           title="or create an account"
