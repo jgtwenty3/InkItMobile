@@ -2,10 +2,16 @@ import { Text, View, StyleSheet, Image, Button } from "react-native";
 import { StatusBar } from "react-native";
 import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGlobalContext } from "./context/GlobalProvider";
 
 
 
 export default function App() {
+
+  const { loading, isLogged } = useGlobalContext();
+
+  if (!loading && isLogged) return <Redirect href="/home" />;
+
   return (
     <SafeAreaView style={styles.container}>
       <Image 
