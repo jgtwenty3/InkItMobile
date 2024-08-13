@@ -115,51 +115,65 @@ export async function signOut() {
   }
 }
 
-// Upload File
-export async function uploadFile(file: FileType, type: string) {
-  if (!file) return;
-
-  const { mimeType, ...rest } = file;
-  const asset = { type: mimeType, ...rest };
-
-  try {
-    const uploadedFile = await storage.createFile(
-      appwriteConfig.storageId,
-      ID.unique(),
-      asset
+export async function getUserAppointments(userId: string){
+  try{
+    const appointments = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.appointmentCollectionId,
+      
     );
-
-    const fileUrl = await getFilePreview(uploadedFile.$id, type);
-    return fileUrl;
-  } catch (error) {
-    throw new Error(error.message);
-  }
+    return appointments.documents;
+  } catch(error){ throw new Error(error)};
 }
 
-// Get File Preview
-export async function getFilePreview(fileId: string, type: string) {
-  let fileUrl;
 
-  try {
-    if (type === "video") {
-      fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
-    } else if (type === "image") {
-      fileUrl = storage.getFilePreview(
-        appwriteConfig.storageId,
-        fileId,
-        2000,
-        2000,
-        "top",
-        100
-      );
-    } else {
-      throw new Error("Invalid file type");
-    }
 
-    if (!fileUrl) throw new Error("Failed to get file preview");
 
-    return fileUrl;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
+// // Upload File
+// export async function uploadFile(file: FileType, type: string) {
+//   if (!file) return;
+
+//   const { mimeType, ...rest } = file;
+//   const asset = { type: mimeType, ...rest };
+
+//   try {
+//     const uploadedFile = await storage.createFile(
+//       appwriteConfig.storageId,
+//       ID.unique(),
+//       asset
+//     );
+
+//     const fileUrl = await getFilePreview(uploadedFile.$id, type);
+//     return fileUrl;
+//   } catch (error) {
+//     throw new Error(error.message);
+//   }
+// }
+
+// // Get File Preview
+// export async function getFilePreview(fileId: string, type: string) {
+//   let fileUrl;
+
+//   try {
+//     if (type === "video") {
+//       fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
+//     } else if (type === "image") {
+//       fileUrl = storage.getFilePreview(
+//         appwriteConfig.storageId,
+//         fileId,
+//         2000,
+//         2000,
+//         "top",
+//         100
+//       );
+//     } else {
+//       throw new Error("Invalid file type");
+//     }
+
+//     if (!fileUrl) throw new Error("Failed to get file preview");
+
+//     return fileUrl;
+//   } catch (error) {
+//     throw new Error(error.message);
+//   }
+// }

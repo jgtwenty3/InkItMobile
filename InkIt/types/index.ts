@@ -69,3 +69,14 @@ export type IContextType = {
       imageUrl: URL;
       
     };
+
+    export type IAppointment ={
+      id:string,
+      startTime: string; 
+      endTime: string;
+      title:string;
+      location:string;
+      referenceImages: string[],
+      clilentId: string,
+      userId:string,
+    }

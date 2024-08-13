@@ -78,7 +78,7 @@ const SignUp = () => {
             isLoading={isSubmitting}
           />
           <CustomButton
-            title="already have an account?"
+            title="have an account?"
             onPress={() => router.push('/SignIn')}
             buttonStyle={styles.mt20}
             textStyle={styles.customButtonText}

@@ -24,6 +24,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    borderWidth:1,
+    borderColor:'gray',
+    width: '45%',
+    
   },
   buttonText: {
     color: 'white', // Customize button text color

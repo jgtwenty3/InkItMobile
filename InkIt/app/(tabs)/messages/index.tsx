@@ -3,11 +3,11 @@ import React from 'react'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const profile = () => {
+const messages = () => {
   return (
     <SafeAreaView style = {styles.container}>
       <View>
-      <Text>calendar</Text>
+      <Text style ={styles.text}>messages</Text>
     </View>
 
     </SafeAreaView>
@@ -15,14 +15,15 @@ const profile = () => {
   )
 }
 
-export default profile
+export default messages
 
 const styles = StyleSheet.create({
   container:{
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: 'black'
+    backgroundColor: 'black',
+    color:"white",
   },
   text: {
     fontFamily: 'courier',
