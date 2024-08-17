@@ -48,7 +48,8 @@ const SignIn = () => {
             title="Email"
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
+            placeholder="email" 
+            otherStyles={{ marginTop: 28 }}
             keyboardType="email-address"
           />
 
@@ -56,7 +57,8 @@ const SignIn = () => {
             title="Password"
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
+            placeholder="enter your password" 
+            otherStyles={{ marginTop: 28 }}
           />
            <CustomButton
             title="log in"

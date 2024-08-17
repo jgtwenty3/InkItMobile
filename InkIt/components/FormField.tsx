@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
-    height: 64, // 16 * 4 (assuming 16 is the base unit)
+    height: 64, 
     paddingHorizontal: 16, // px-4
     backgroundColor: '#1A1A1A', // black-100
     borderRadius: 16, // rounded-2xl

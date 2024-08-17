@@ -18,9 +18,10 @@ const SearchInput: React.FC<SearchInputProps> = ({ initialQuery }) => {
       <TextInput
         style={styles.input}
         value={query}
-        placeholder="search clients"
+        placeholder="search client name"
         placeholderTextColor="#CDCDE0"
         onChangeText={(text) => setQuery(text)}
+        selectionColor="black"
       />
       <TouchableOpacity
         onPress={() => {

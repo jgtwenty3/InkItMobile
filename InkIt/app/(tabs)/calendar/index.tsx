@@ -18,28 +18,7 @@ const CalendarScreen = () => {
   const navigation = useNavigation();
   const {data:appointments} = useAppwrite(()=>getUserAppointments(user.$id))
   
-  useEffect(() => {
-    if (appointments) {
-      // Transform appointments into the format expected by Agenda
-      const transformedItems = appointments.reduce((acc, appointment) => {
-        const date = new Date(appointment.startTime).toISOString().split('T')[0]; // Extract date in YYYY-MM-DD format
-        if (!acc[date]) acc[date] = [];
-        acc[date].push({
-          name: appointment.title,
-          height: 50, // Adjust height as needed
-        });
-        return acc;
-      }, {});
-
-      setItems(transformedItems);
-    }
-  }, [appointments]);
-  const renderItem = (item) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemTitle}>{item.name}</Text>
-      {/* Add more item details here if needed */}
-    </View>
-  );
+ 
 
   
   return (
@@ -48,7 +27,7 @@ const CalendarScreen = () => {
         <Agenda
         
           items={items}
-          renderItem={renderItem}
+          
           theme={{
             backgroundColor: '#000000',
             calendarBackground: '#000000',

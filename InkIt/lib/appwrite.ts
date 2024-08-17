@@ -116,15 +116,82 @@ export async function signOut() {
 }
 
 export async function getUserAppointments(userId: string){
-  try{
+  try {
     const appointments = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.appointmentCollectionId,
-      
-    );
+      [Query.equal("creator", userId)]
+    ) ;
     return appointments.documents;
-  } catch(error){ throw new Error(error)};
+  }catch(error){
+    throw new Error(error)
+  }
 }
+
+export async function getUserClients(userId:string){
+  try {
+    const clients = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      [Query.equal("creator", userId)]
+    );
+    return clients.documents
+  }
+  catch(error){
+    throw new Error(error)
+  }
+}
+
+export async function createClient(form: {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  state: string;
+  country: string;
+}) {
+  try {
+    //  get the current user to associate the client with the logged-in user
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User not found");
+
+    // Create a new client document in the database
+    const newClient = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      ID.unique(),
+      {
+        fullName: form.fullName,
+        email: form.email,
+        phoneNumber: form.phoneNumber,
+        city: form.city,
+        state: form.state,
+        country: form.country,
+        creator: currentUser.$id, // Associate the client with the logged-in user
+      }
+    );
+
+    return newClient;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+
+
+export async function getAppointments(){
+  try {
+    const allAppointments = await databases.listDocuments(
+      appwriteConfig.databaseId, 
+      appwriteConfig.appointmentCollectionId,
+    )
+    return allAppointments.documents;
+  }
+  catch(error){
+    throw new Error(error)
+  }
+}
+
 
 
 

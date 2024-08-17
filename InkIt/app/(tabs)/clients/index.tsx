@@ -1,28 +1,40 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SearchInput from '@/components/SearchInput';
-import ClientCard from '@/components/ClientCard';
 import { router } from 'expo-router';
 import CustomButton from '@/components/CustomButton';
 import { useNavigation } from '@react-navigation/native';
+import { useGlobalContext } from '@/app/context/GlobalProvider';
+import { getUserClients } from '@/lib/appwrite';
 
 
 const Clients = () => {
+  const { user, setUser, setIsLogged } = useGlobalContext();
+  const {data:clients} = getUserClients(user.$id)
+  console.log(clients)
+  console.log(user.$id)
+  
   const navigation = useNavigation();
+  
+
+  
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.innerContainer}>
         <SearchInput />
-        <ClientCard />
+        
       </ScrollView>
       <View>
       <CustomButton
             title="add a new client"
-            onPress={() => navigation.navigate('ClientDetails')}
+            onPress={() => navigation.navigate('AddClient')}
             buttonStyle={styles.mt20}
             
+            
           />
+      
+      
       </View>
     </SafeAreaView>
   );
