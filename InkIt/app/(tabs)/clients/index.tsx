@@ -1,40 +1,75 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SearchInput from '@/components/SearchInput';
-import { router } from 'expo-router';
-import CustomButton from '@/components/CustomButton';
 import { useNavigation } from '@react-navigation/native';
+import CustomButton from '@/components/CustomButton';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { getUserClients } from '@/lib/appwrite';
 
-
 const Clients = () => {
-  const { user, setUser, setIsLogged } = useGlobalContext();
-  const {data:clients} = getUserClients(user.$id)
-  console.log(clients)
-  console.log(user.$id)
-  
-  const navigation = useNavigation();
-  
+  const { user } = useGlobalContext();
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const clientsData = await getUserClients(user.$id);
+        setClients(clientsData);
+      } catch (error) {
+        setError('Failed to fetch clients');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user && user.$id) {
+      fetchClients();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.innerContainer}>
         <SearchInput />
-        
+        {clients.length > 0 ? (
+          clients.map((client: any) => (
+            <View key={client.$id} style={styles.clientCard}>
+              <Text style={styles.clientText}>{client.fullName}</Text>
+              <Text style={styles.clientText}>{client.email}</Text>
+              {/* Add more client details here */}
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noClientsText}>No clients found</Text>
+        )}
       </ScrollView>
       <View>
-      <CustomButton
-            title="add a new client"
-            onPress={() => navigation.navigate('AddClient')}
-            buttonStyle={styles.mt20}
-            
-            
-          />
-      
-      
+        <CustomButton
+          title="Add a New Client"
+          onPress={() => navigation.navigate('AddClient')}
+          buttonStyle={styles.mt20}
+        />
       </View>
     </SafeAreaView>
   );
@@ -46,39 +81,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    alignItems:'center'
+    alignItems: 'center',
   },
   innerContainer: {
     flex: 1,
-     // Align items to the top
-     
-    
+    width: '100%',
+    paddingHorizontal: 16,
   },
   text: {
     fontFamily: 'courier',
     color: 'white',
   },
-  image: {
-    width: 200,  // Set the desired width
-    height: 200, // Set the desired height
-    resizeMode: 'contain', // Ensure the image maintains its aspect ratio
-    marginBottom: 20, // Add some space below the image if needed
-  },
-  input: {
-    height: 40,
-    width: '100%',
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    color: 'white',
+  clientCard: {
     backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 8,
   },
-  icon: {
-    width: 20, // Equivalent to w-5
-    height: 20, // Equivalent to h-5
+  clientText: {
+    color: 'black',
+    fontSize: 16,
+  },
+  noClientsText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
   mt20: {
     marginTop: 20,
   },
-
 });
