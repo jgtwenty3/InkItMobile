@@ -57,6 +57,7 @@ const Clients = () => {
             <View key={client.$id} style={styles.clientCard}>
               <Text style={styles.clientText}>{client.fullName}</Text>
               <Text style={styles.clientText}>{client.email}</Text>
+            
               {/* Add more client details here */}
             </View>
           ))
@@ -93,18 +94,22 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   clientCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'black',
     borderRadius: 8,
+    borderColor: 'white',
+    borderWidth: 2, 
     padding: 16,
     marginVertical: 8,
   },
   clientText: {
-    color: 'black',
+    color: 'white',
     fontSize: 16,
+    fontFamily: 'courier'
   },
   noClientsText: {
     color: 'white',
     textAlign: 'center',
+    fontFamily:"courier",
     marginTop: 20,
   },
   errorText: {
