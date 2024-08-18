@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native'; // For route parameters
 
 // Assuming you have a function to fetch client details
-import { getClientById } from '@/lib/appwrite';
+import { getClientById,deleteClient } from '@/lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
 
@@ -29,6 +29,23 @@ const ClientDetails = () => {
 
     fetchClient();
   }, [clientId]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteClient(clientId);
+      // Handle successful deletion (e.g., navigate back, show a message)
+    } catch (error) {
+      console.error('Failed to delete client:', error.message);
+    }
+  };
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (!client) {
+    return <Text>Client not found</Text>;
+  }
 
   if (loading) {
     return (
@@ -58,20 +75,28 @@ const ClientDetails = () => {
           <Text style={styles.clientText}>Country: {client.country}</Text>
           <Text style={styles.clientText}>Last Appointment: </Text>
           <Text style={styles.clientText}>NextAppointment: </Text>
-          <Text style={styles.clientText}>Country: {client.country}</Text>
+          
         </View>
       ) : (
         <Text style={styles.noClientText}>Client not found</Text>
       )}
+      <View style={styles.clientText}>
+        Reference Images:
+      </View>
       
       <View>
         <CustomButton
         title = "edit details"
         
         buttonStyle = {styles.mt20}
-        
+        />
+         <CustomButton
+        title = "delete"
+        onPress ={handleDelete}
+        buttonStyle = {styles.mt20}
         />
       </View>
+
     </SafeAreaView>
   );
 };

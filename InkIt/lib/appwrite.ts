@@ -190,6 +190,19 @@ export async function getClientById(clientId: string) {
   }
 }
 
+export async function deleteClient(clientId:string){
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      clientId
+    )
+    return { success: true }
+  } catch (error) {
+    throw new Error('Failed to delete client: ' + error.message);
+  }
+}
+
 
 
 export async function getAppointments(){
