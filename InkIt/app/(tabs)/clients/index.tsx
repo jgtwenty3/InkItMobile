@@ -6,14 +6,13 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '@/components/CustomButton';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { getUserClients } from '@/lib/appwrite';
+import { Link } from 'expo-router';
 
 const Clients = () => {
   const { user } = useGlobalContext();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -57,8 +56,7 @@ const Clients = () => {
             <View key={client.$id} style={styles.clientCard}>
               <Text style={styles.clientText}>{client.fullName}</Text>
               <Text style={styles.clientText}>{client.email}</Text>
-            
-              {/* Add more client details here */}
+              <Link href={`/clients/${client.$id}`}>More Details</Link>
             </View>
           ))
         ) : (
@@ -89,10 +87,6 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 16,
   },
-  text: {
-    fontFamily: 'courier',
-    color: 'white',
-  },
   clientCard: {
     backgroundColor: 'black',
     borderRadius: 8,
@@ -104,12 +98,17 @@ const styles = StyleSheet.create({
   clientText: {
     color: 'white',
     fontSize: 16,
-    fontFamily: 'courier'
+    fontFamily: 'courier',
+  },
+  linkText: {
+    color: 'white',
+    marginTop: 10,
+    fontFamily: 'courier',
   },
   noClientsText: {
     color: 'white',
     textAlign: 'center',
-    fontFamily:"courier",
+    fontFamily: 'courier',
     marginTop: 20,
   },
   errorText: {

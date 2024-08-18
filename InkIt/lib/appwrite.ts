@@ -177,6 +177,19 @@ export async function createClient(form: {
   }
 }
 
+export async function getClientById(clientId: string) {
+  try {
+    const clientData = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      clientId
+    );
+    return clientData;
+  } catch (error) {
+    throw new Error('Failed to fetch client');
+  }
+}
+
 
 
 export async function getAppointments(){
