@@ -1,8 +1,7 @@
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useRoute } from '@react-navigation/native'; // For route parameters
-
-// Assuming you have a function to fetch client details
+import { useRoute } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { getClientById,deleteClient } from '@/lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
@@ -33,7 +32,8 @@ const ClientDetails = () => {
   const handleDelete = async () => {
     try {
       await deleteClient(clientId);
-      // Handle successful deletion (e.g., navigate back, show a message)
+      router.push('/clients');
+      
     } catch (error) {
       console.error('Failed to delete client:', error.message);
     }

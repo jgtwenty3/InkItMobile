@@ -6,13 +6,14 @@ import { useNavigation } from '@react-navigation/native';
 import CustomButton from '@/components/CustomButton';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { getUserClients } from '@/lib/appwrite';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 const Clients = () => {
   const { user } = useGlobalContext();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation()
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -66,7 +67,7 @@ const Clients = () => {
       <View>
         <CustomButton
           title="Add a New Client"
-          onPress={() => navigation.navigate('AddClient')}
+          onPress={() => navigation.navigate('AddClient')} 
           buttonStyle={styles.mt20}
         />
       </View>

@@ -8,7 +8,7 @@ export default function ClientsLayout() {
         name="[clientId]" // Dynamic route for client details
         options={{ headerShown: false }}
       />
-      <Stack.Screen name = "AddClient" options={{ headerShown: false }}/>
+      <Stack.Screen name = "AddClient" options = {{headerShown:false}} />
       
     </Stack>
   );
