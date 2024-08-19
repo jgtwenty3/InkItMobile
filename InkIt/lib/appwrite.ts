@@ -167,6 +167,19 @@ export async function createToDoListItem(form: { item: string }) {
   }
 }
 
+export async function deleteToDoListItem(toDoListItemId:string){
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.toDoListCollectionId,
+      toDoListItemId
+    )
+    return { success: true }
+  } catch (error) {
+    throw new Error('Failed to delete item: ' + error.message);
+  }
+}
+
 export async function getUserClients(userId:string){
   try {
     const clients = await databases.listDocuments(

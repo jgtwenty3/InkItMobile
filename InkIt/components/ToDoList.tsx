@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { useNavigation } from 'expo-router';
-import { getUserToDoList } from '@/lib/appwrite';
+import { getUserToDoList, deleteToDoListItem } from '@/lib/appwrite';
 import CustomButton from './CustomButton';
 import ToDoModal from './ToDoModal';
 
@@ -42,6 +42,16 @@ const ToDoList = () => {
     }
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      await deleteToDoListItem(itemId);
+      // Refresh the list after deletion
+      refreshToDoList();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete item');
+    }
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -52,7 +62,7 @@ const ToDoList = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <FlatList
         data={toDoList}
         keyExtractor={(item) => item.$id}
@@ -61,6 +71,9 @@ const ToDoList = () => {
             <Text style={[styles.toDoText, item.completed && styles.completedText]}>
               {item.item}
             </Text>
+            <TouchableOpacity onPress={() => handleDeleteItem(item.$id)} style={styles.deleteButton}>
+              <Text style={styles.deleteText}>Delete</Text>
+            </TouchableOpacity>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>No To-Do items found.</Text>}
@@ -77,7 +90,7 @@ const ToDoList = () => {
         onClose={() => setModalVisible(false)}
         onAdd={refreshToDoList}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -91,6 +104,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderColor: 'white',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   toDoText: {
     fontSize: 16,
@@ -100,7 +116,16 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: 'line-through',
-    color: 'grey',
+    color: 'white',
+  },
+  deleteButton: {
+    padding: 10,
+    backgroundColor: 'red',
+    borderRadius: 5,
+  },
+  deleteText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   emptyText: {
     textAlign: 'center',
