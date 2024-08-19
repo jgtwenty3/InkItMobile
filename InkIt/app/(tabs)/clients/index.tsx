@@ -34,7 +34,7 @@ const Clients = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ffffff" />
       </SafeAreaView>
     );
@@ -82,6 +82,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
     alignItems: 'center',
+  },
+  loadingContainer:{
+    flex: 1,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent:'center'
   },
   innerContainer: {
     flex: 1,

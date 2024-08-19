@@ -72,7 +72,7 @@ const ToDoList = () => {
               {item.item}
             </Text>
             <TouchableOpacity onPress={() => handleDeleteItem(item.$id)} style={styles.deleteButton}>
-              <Text style={styles.deleteText}>Delete</Text>
+              <Text style={styles.deleteText}>x</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -80,7 +80,7 @@ const ToDoList = () => {
       />
       <View style={styles.buttonView}>
         <CustomButton
-          title="Add To-Do Item"
+          title="add to list"
           onPress={handleAddToDoItem}
           buttonStyle={styles.button}
         />
@@ -120,8 +120,10 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 10,
-    backgroundColor: 'red',
+    backgroundColor: 'black',
     borderRadius: 5,
+    borderColor:'white',
+    borderWidth:1,
   },
   deleteText: {
     color: 'white',

@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View, ScrollView } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
@@ -8,16 +8,14 @@ import ToDoList from '@/components/ToDoList';
 const Home = () => {
   const navigation = useNavigation();
   
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Half: To Do List */}
       <View style={styles.halfContainer}>
         <Text style={styles.headerText}>To Do:</Text>
-        <View style={styles.listContainer}>
+        <ScrollView style={styles.listContainer} contentContainerStyle={styles.scrollContent}>
           <ToDoList />
-        </View>
-      
+        </ScrollView>
       </View>
 
       {/* Bottom Half: Upcoming Appointments */}
@@ -51,5 +49,9 @@ const styles = StyleSheet.create({
   listContainer: {
     width: '100%',
     paddingHorizontal: 20,
+    flex: 1, // Ensures the ScrollView takes up the entire half
+  },
+  scrollContent: {
+    flexGrow: 1, // Makes sure the content inside ScrollView fills the ScrollView
   },
 });

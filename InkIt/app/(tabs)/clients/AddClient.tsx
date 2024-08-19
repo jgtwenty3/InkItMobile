@@ -52,7 +52,7 @@ const AddClient = () => {
         otherStyles={{ marginTop: 28, width: '90%' }}
       />
       <FormField
-        title="phoneNumber"
+        title="phone number"
         value={form.phoneNumber}
         handleChangeText={(e) => setForm({ ...form, phoneNumber: e })}
         placeholder="client's number" 
@@ -86,13 +86,13 @@ const AddClient = () => {
           title="add client"
           onPress={handleSubmit}
           buttonStyle={styles.customButton}
-          textStyle={styles.customButtonText}
+          
         />
         <CustomButton
           title="cancel"
           onPress={() => router.push('/clients')}
           buttonStyle={styles.customButton}
-          textStyle={styles.customButtonText}
+          
         />
       </View>
     </SafeAreaView>
@@ -116,11 +116,7 @@ const styles = StyleSheet.create({
   mt20: {
     marginTop: 20,
   },
-  customButtonText: {
-    fontFamily: 'courier',
-    fontSize: 16,
-    textAlign: 'center', // Center the text inside the button
-  },
+  
   // New styles for button container and buttons
   buttonContainer: {
     flexDirection: 'row',
@@ -130,6 +126,10 @@ const styles = StyleSheet.create({
   },
   customButton: {
     width: '48%', // Make each button take up 48% of the container width
-    paddingVertical: 12, // Add vertical padding for better touch area
+    paddingVertical: 12,
+    fontFamily: 'courier',
+    fontSize: 16,
+    textAlign: 'center'
+     // Add vertical padding for better touch area
   },
 })

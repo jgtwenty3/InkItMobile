@@ -255,6 +255,35 @@ export async function deleteClient(clientId:string){
   }
 }
 
+export async function updateClient(clientId: string, form: {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  state: string;
+  country: string;
+}) {
+  try {
+    // Update the client document in the database
+    const updatedClient = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.clientCollectionId,
+      clientId,
+      {
+        fullName: form.fullName,
+        email: form.email,
+        phoneNumber: form.phoneNumber,
+        city: form.city,
+        state: form.state,
+        country: form.country,
+      }
+    );
+
+    return updatedClient;
+  } catch (error) {
+    throw new Error('Failed to update client: ' + error.message);
+  }
+}
 
 
 export async function getAppointments(){

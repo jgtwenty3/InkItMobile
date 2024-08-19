@@ -22,7 +22,7 @@ const Profile = () => {
       <View style={styles.content}>
         <Text style={styles.header}>{user.username}'s Profile</Text>
         <Text style={styles.text}>{user.email}</Text>
-        <CustomButton title="edit profile" onPress={() => router.push('/EditProfile')} />
+        <CustomButton title="edit profile" onPress={() => router.push('profile/EditProfile')} />
       </View>
       <View style={styles.buttonContainer}>
         <CustomButton title="Log out" onPress={logout} />
