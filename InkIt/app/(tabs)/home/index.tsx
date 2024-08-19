@@ -7,6 +7,7 @@ import ToDoList from '@/components/ToDoList';
 
 const Home = () => {
   const navigation = useNavigation();
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -16,6 +17,7 @@ const Home = () => {
         <View style={styles.listContainer}>
           <ToDoList />
         </View>
+      
       </View>
 
       {/* Bottom Half: Upcoming Appointments */}

@@ -144,6 +144,29 @@ export async function getUserToDoList(userId:string){
   }
 }
 
+export async function createToDoListItem(form: { item: string }) {
+  try {
+    // Await the result of getCurrentUser to ensure you get the user object
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User not found");
+
+    // Create the new to-do item
+    const newItem = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.toDoListCollectionId,
+      ID.unique(),
+      {
+        item: form.item,
+        creator: currentUser.$id, // Use the user ID from the resolved user object
+      }
+    );
+    return newItem;
+  } catch (error) {
+    console.error('Failed to create to-do item:', error); // Log the error for debugging
+    throw new Error(error.message);
+  }
+}
+
 export async function getUserClients(userId:string){
   try {
     const clients = await databases.listDocuments(
