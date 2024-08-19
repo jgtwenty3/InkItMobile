@@ -73,15 +73,15 @@ const SignUp = () => {
           <CustomButton
             title="sign up"
             onPress={submit}
-            buttonStyle={styles.customButton}
-            textStyle={styles.customButtonText}
+            buttonStyle={styles.button}
+            
             isLoading={isSubmitting}
           />
           <CustomButton
             title="have an account?"
             onPress={() => router.push('/SignIn')}
-            buttonStyle={styles.mt20}
-            textStyle={styles.customButtonText}
+            buttonStyle={styles.button}
+            
           />
         </View>
       </ScrollView>
@@ -118,8 +118,11 @@ const styles = StyleSheet.create({
   mt7: {
     marginTop: 28, // Assuming 7*4 = 28 based on typical scaling
   },
-  mt20: {
+  button: {
     marginTop: 20,
+    fontFamily: 'courier',
+    fontSize: 16,
+    width:200,
   },
   customButton: {
     marginTop: 20,

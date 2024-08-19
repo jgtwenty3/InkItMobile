@@ -63,7 +63,7 @@ const SignIn = () => {
            <CustomButton
             title="log in"
             onPress={submit}
-            buttonStyle={styles.mt20}
+            buttonStyle={styles.button}
             
             
           />
@@ -71,7 +71,7 @@ const SignIn = () => {
          <CustomButton
           title="create an account"
           onPress={() => router.push('/SignUp')}
-          buttonStyle={styles.mt20}
+          buttonStyle={styles.button}
         />
     </SafeAreaView>
   )
@@ -103,8 +103,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain', // Ensure the image maintains its aspect ratio
     marginBottom: 20 // Add some space below the image if needed
   },
-  mt20: {
+ button: {
     marginTop: 20,
+    width:200,
   },
   
 });

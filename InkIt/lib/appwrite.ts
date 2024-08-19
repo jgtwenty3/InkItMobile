@@ -9,6 +9,7 @@ export const appwriteConfig = {
   userCollectionId: '66adaa90003c87d9bd06',
   clientCollectionId: '66adaa990011a8dcd6e9',
   appointmentCollectionId: '66adaa9f0022a0ccfd62',
+  toDoListCollectionId:'66c2a02c002f643033f5',
 };
 
 export const client = new Client();
@@ -125,6 +126,21 @@ export async function getUserAppointments(userId: string){
     return appointments.documents;
   }catch(error){
     throw new Error(error)
+  }
+}
+
+export async function getUserToDoList(userId:string){
+  try {
+    const toDoList = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.toDoListCollectionId,
+      [Query.equal("creator", userId)]
+    )
+    return toDoList.documents;
+    
+  } catch (error) {
+    throw new Error(error)
+    
   }
 }
 
