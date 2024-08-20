@@ -121,9 +121,11 @@ export async function getUserAppointments(userId: string){
     const appointments = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.appointmentCollectionId,
-      [Query.equal("creator", userId)]
+      [Query.equal("creator", userId), Query.orderDesc('startTime')]
+      
     ) ;
     return appointments.documents;
+    
   }catch(error){
     throw new Error(error)
   }

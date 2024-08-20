@@ -1,64 +1,106 @@
-import { StyleSheet, View, Dimensions, Text } from 'react-native';
-import React, {  useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, ActivityIndicator, Text, Button, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Agenda } from 'react-native-calendars';
+import Timetable from 'react-native-calendar-timetable';
+import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
-import useAppwrite from '@/lib/useAppwrite';
 import { useNavigation } from 'expo-router';
 
-
-const { width } = Dimensions.get('window');
-const { height } = Dimensions.get('window');
+// Your custom component for rendering timetable items
+const CalendarComponent = ({ style, item }) => (
+  <View style={[style, styles.eventItem]}>
+    <Text style={styles.eventTitle}>{item.title} w/{item.client}</Text>
+    <Text style={styles.eventTime}>
+      {moment(item.startDate).format('h:mm A')} - {moment(item.endDate).format('h:mm A')}
+    </Text>
+  </View>
+);
 
 const CalendarScreen = () => {
-  const {user, setUser, setIsLogged} = useGlobalContext();
-  const [items, setItems] = useState({});
+  const { user } = useGlobalContext();
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const navigation = useNavigation();
-  const {data:appointments} = useAppwrite(()=>getUserAppointments(user.$id))
-  
- 
 
-  
+  // Define date range for the timetable
+  const [from] = React.useState(moment().subtract(3, 'days').toDate());
+  const [till] = React.useState(moment().add(3, 'days').toISOString());
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const appointmentsData = await getUserAppointments(user.$id);
+        const formattedAppointments = appointmentsData.map((appointment) => ({
+          title: appointment.title,
+          startDate: new Date(appointment.startTime),
+          endDate: new Date(appointment.endTime),
+          client: (appointment.client.fullName)
+        }));
+        setAppointments(formattedAppointments);
+        console.log(formattedAppointments)
+      } catch (error) {
+        setError('Failed to fetch appointments');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user && user.$id) {
+      fetchAppointments();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </SafeAreaView>
+    );
+  }
+
+  const handlePrevDay = () => {
+    setCurrentDate(prevDate => moment(prevDate).subtract(1, 'day').toDate());
+  };
+
+  const handleNextDay = () => {
+    setCurrentDate(prevDate => moment(prevDate).add(1, 'day').toDate());
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.contentContainer}>
-        <Agenda
+      <View style={styles.navigationContainer}>
+        <Button title="Previous Day" onPress={handlePrevDay} color="transparent" style={styles.navButton} />
+        <Text style={styles.currentDate}>
+          {moment(currentDate).format('MMMM D, YYYY')}
+        </Text>
+        <Button title="Next Day" onPress={handleNextDay} color="transparent" style={styles.navButton} />
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <Timetable
+        items={appointments}
+        renderItem={(props) => <CalendarComponent {...props} />}
+        date={currentDate}
+        headerContainerStyle={styles.headerContainer}
+        headerTextStyle={styles.headerText}
+        containerStyle={styles.containerStyle}
+        timeContainerStyle={styles.timeContainer}
+        timeTextStyle={styles.timeText}
+        linesContainerStyle={styles.linesContainer}
+        nowLineDotStyle={styles.nowLineDot}
+        nowLineLineStyle={styles.nowLineLine}
+        fromHour={0}
+        toHour={24}
+        is12Hour={true}
+      />
         
-          items={items}
-          
-          theme={{
-            backgroundColor: '#000000',
-            calendarBackground: '#000000',
-            textSectionTitleColor: '#ffffff',
-            selectedDayBackgroundColor: '#ffffff',
-            selectedDayTextColor: '#000000',
-            todayTextColor: 'red',
-            dayTextColor: '#ffffff',
-            textDisabledColor: '#444444',
-            monthTextColor: '#ffffff',
-            indicatorColor: '#ffffff',
-            textDayFontFamily: 'Courier',
-            textMonthFontFamily: 'Courier',
-            textDayHeaderFontFamily: 'Courier',
-            textDayFontWeight: '300',
-            textMonthFontWeight: 'bold',
-            textDayHeaderFontWeight: '300',
-            textDayFontSize: 16,
-            textMonthFontSize: 16,
-            textDayHeaderFontSize: 16,
-          }}
-          style={{
-            borderWidth: 1,
-            borderColor: 'gray',
-            height: height * 0.8, // Adjusted height for better visibility
-          }}
-        />
-        <View style={styles.buttonContainer}>
+      </ScrollView>
+      <View style={styles.buttonContainer}>
           <CustomButton title="Add Appointment" onPress={() => navigation.navigate('AddAppointment')} />
         </View>
-      </View>
     </SafeAreaView>
   );
 };
@@ -68,26 +110,79 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
   },
-  contentContainer: {
+  loadingContainer: {
     flex: 1,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  navigationContainer: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    margin: 20,
+  },
+  currentDate: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'Courier',
   },
   buttonContainer: {
     alignItems: 'center',
     margin: 20,
   },
-  itemContainer: {
-    backgroundColor: 'black',
-    borderRadius: 5,
+  eventItem: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 5,
     padding: 10,
-    marginBottom: 10,
-    marginHorizontal: 15,
+    color:'black',
+    fontFamily:'Courier'
   },
-  itemTitle: {
-    color: '#ffffff',
+  eventTitle: {
+    color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'courier'
+    fontFamily:'Courier'
+  },
+  eventTime: {
+    color: 'black',
+    fontSize: 14,
+  },
+  headerContainer: {
+    // Add your styles for header container
+  },
+  headerText: {
+    // Add your styles for header text
+  },
+  containerStyle: {
+    // Add your styles for timetable container
+  },
+  timeContainer: {
+    // Add your styles for time container
+  },
+  timeText: {
+    // Add your styles for time text
+  },
+  linesContainer: {
+    // Add your styles for lines container
+  },
+  nowLineDot: {
+    // Add your styles for 'now' line dot
+  },
+  nowLineLine: {
+    // Add your styles for 'now' line
+  },
+  navButton: {
+    backgroundColor: 'black',
+    borderColor: 'white',
+    borderWidth: 1,
+    color: 'white',
+    fontFamily: 'Courier',
   },
 });
 

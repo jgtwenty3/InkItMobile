@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
       width: '90%',
       maxWidth: 400,
       backgroundColor: 'black', // Match ToDoList background color
-      borderRadius: 10,
+      borderWidth:2,
+      borderColor:'white',
       padding: 20,
       alignItems: 'center',
     },
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
       width: '100%',
       padding: 10,
       borderWidth: 1,
-      borderColor: '#ccc',
+      borderColor: 'white',
       borderRadius: 5,
       marginBottom: 15,
       color: 'white', // Text color to match ToDoList
@@ -96,15 +97,12 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       marginHorizontal: 5,
       width: '48%',
+      borderWidth:1,
+      borderColor:'white'
     },
-    addButton: {
-      backgroundColor: '#007BFF', // Blue background for Add button
-    },
-    cancelButton: {
-      backgroundColor: '#FF6347', // Red background for Cancel button
-    },
+ 
     buttonText: {
-      color: 'white', // Button text color to match ToDoList
+      color: 'white', 
       textAlign: 'center',
     },
   });

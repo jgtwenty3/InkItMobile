@@ -11,6 +11,7 @@ import { getClientById, deleteClient } from '@/lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
 import EditClientModal from '@/components/EditClientModal'; // Import your existing EditClientModal
+import ReferenceImages from '@/components/ReferenceImages';// Import ReferenceImages component
 
 const ClientDetails = () => {
   const route = useRoute();
@@ -87,20 +88,32 @@ const ClientDetails = () => {
         <Text style={styles.clientText}>State: {client.state}</Text>
         <Text style={styles.clientText}>Country: {client.country}</Text>
       </View>
+
+      {/* Reference Images Section */}
+      <View style={styles.referenceImagesContainer}>
+        <Text style={styles.clientText}>Reference Images:</Text>
+        <ReferenceImages />
+      </View>
+
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="Edit Details"
+          title="edit"
           onPress={handleEdit}
           buttonStyle={[styles.button, styles.editButton]}
         />
         <CustomButton
-          title="Delete"
+          title="delete"
           onPress={handleDelete}
+          buttonStyle={[styles.button, styles.deleteButton]}
+        />
+         <CustomButton
+          title="cancel"
+          onPress={() => router.push('/clients')}
           buttonStyle={[styles.button, styles.deleteButton]}
         />
       </View>
 
-      
+      {/* EditClientModal integration */}
       <EditClientModal
         visible={isModalVisible}
         client={client}
@@ -147,6 +160,9 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+  },
+  referenceImagesContainer: {
+    marginBottom: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
