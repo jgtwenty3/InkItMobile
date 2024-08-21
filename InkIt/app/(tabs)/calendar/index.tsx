@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, Button, ScrollView } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Text, Button, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Timetable from 'react-native-calendar-timetable';
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
-import { useNavigation } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import AddAppointmentModal from '@/components/AddAppointmentModal';
 
-// Your custom component for rendering timetable items
-const CalendarComponent = ({ style, item }) => (
-  <View style={[style, styles.eventItem]}>
-    <Text style={styles.eventTitle}>{item.title} w/{item.client}</Text>
-    <Text style={styles.eventTime}>
-      {moment(item.startDate).format('h:mm A')} - {moment(item.endDate).format('h:mm A')}
-    </Text>
-  </View>
-);
+const CalendarComponent = ({ style, item }) => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    router.push(`/calendar/${item.id}`);
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress} style={[style, styles.eventItem]}>
+      <Text style={styles.eventTitle}>{item.title} w/{item.client}</Text>
+      <Text style={styles.eventTime}>
+        {moment(item.startDate).format('h:mm A')} - {moment(item.endDate).format('h:mm A')}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const CalendarScreen = () => {
   const { user } = useGlobalContext();
@@ -25,11 +32,10 @@ const CalendarScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [modalVisible, setModalVisible] = useState<boolean>(false); // State for modal visibility
-  const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  const [from] = React.useState(moment().subtract(3, 'days').toDate());
-  const [till] = React.useState(moment().add(3, 'days').toISOString());
+  const [from] = useState(moment().subtract(3, 'days').toDate());
+  const [till] = useState(moment().add(3, 'days').toISOString());
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -37,6 +43,7 @@ const CalendarScreen = () => {
         if (user?.$id) {
           const appointmentsData = await getUserAppointments(user.$id);
           const formattedAppointments = appointmentsData.map((appointment) => ({
+            id: appointment.$id,
             title: appointment.title,
             startDate: new Date(appointment.startTime),
             endDate: new Date(appointment.endTime),
@@ -52,7 +59,7 @@ const CalendarScreen = () => {
         setLoading(false);
       }
     };
-  
+
     fetchAppointments();
   }, [user]);
 
@@ -73,11 +80,11 @@ const CalendarScreen = () => {
   };
 
   const handleAddAppointment = () => {
-    setModalVisible(true); // Show the modal
+    setModalVisible(true);
   };
 
   const closeModal = () => {
-    setModalVisible(false); // Hide the modal
+    setModalVisible(false);
   };
 
   return (
@@ -110,7 +117,6 @@ const CalendarScreen = () => {
       <View style={styles.buttonContainer}>
         <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
       </View>
-      {/* AddAppointmentModal Integration */}
       <AddAppointmentModal visible={modalVisible} onClose={closeModal} />
     </SafeAreaView>
   );
@@ -186,7 +192,7 @@ const styles = StyleSheet.create({
     // Add your styles for 'now' line dot
   },
   nowLineLine: {
-    color: "white",
+    color: 'white',
   },
   navButton: {
     backgroundColor: 'black',

@@ -146,7 +146,7 @@ export async function getUserToDoList(userId:string){
   }
 }
 
-export async function createAppointment(form:{startTime:string, endTime:string, title:string}){
+export async function createAppointment(form:{startTime:string, endTime:string, title:string, depositPaid:boolean,referenceImages:[]}){
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
@@ -160,7 +160,9 @@ export async function createAppointment(form:{startTime:string, endTime:string, 
         creator:currentUser.$id,
         startTime:form.startTime,
         endTime:form.endTime,
-        title:form.title
+        title:form.title,
+        referenceImages:form.referenceImages,
+        depositPaid:form.depositPaid,
 
       }
     );
@@ -265,6 +267,66 @@ export async function getClientById(clientId: string) {
     return clientData;
   } catch (error) {
     throw new Error('Failed to fetch client');
+  }
+}
+
+export async function getAppointmentById(appointmentId:string){
+  try {
+    const appointmentData = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.appointmentCollectionId,
+      appointmentId,
+    )
+    return appointmentData;
+  } catch (error) {
+    throw new Error('Failed to fetch appointment');
+  }
+}
+
+export async function deleteAppointment(appointmentId:string){
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.appointmentCollectionId,
+      appointmentId,
+    )
+    return { success: true }
+  } catch (error) {
+    throw new Error('Failed to delete appointment: ' + error.message);
+  }
+}
+
+export async function updateAppointment(
+  appointmentId: string,
+  form: {
+    startTime: string;
+    endTime: string;
+    title: string;
+    location?: string; // optional if not all appointments have a location
+    referenceImages?: string[];
+    depositPaid:boolean 
+  }
+) {
+  try {
+    // Update the appointment document in the database
+    const updatedAppointment = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.appointmentCollectionId,
+      appointmentId,
+      {
+        startTime: form.startTime,
+        endTime: form.endTime,
+        title: form.title,
+        location: form.location, // include if location is provided
+        referenceImages: form.referenceImages, 
+        depositPaid: form.depositPaid,// include if reference images are provided
+      }
+    );
+
+    return updatedAppointment;
+  } catch (error) {
+    console.error('Failed to update appointment:', error);
+    throw new Error('Failed to update appointment: ' + error.message);
   }
 }
 
