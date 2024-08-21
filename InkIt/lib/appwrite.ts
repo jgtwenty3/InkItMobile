@@ -146,9 +146,33 @@ export async function getUserToDoList(userId:string){
   }
 }
 
+export async function createAppointment(form:{startTime:string, endTime:string, title:string}){
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User not found");
+
+    const newAppointment = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.appointmentCollectionId,
+      ID.unique(),
+      {
+       
+        creator:currentUser.$id,
+        startTime:form.startTime,
+        endTime:form.endTime,
+        title:form.title
+
+      }
+    );
+    return newAppointment
+  } catch (error) {
+    console.error('Failed to create appointment:', error); 
+    throw new Error(error.message);
+  }
+}
+
 export async function createToDoListItem(form: { item: string }) {
   try {
-    // Await the result of getCurrentUser to ensure you get the user object
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
 
@@ -159,12 +183,12 @@ export async function createToDoListItem(form: { item: string }) {
       ID.unique(),
       {
         item: form.item,
-        creator: currentUser.$id, // Use the user ID from the resolved user object
+        creator: currentUser.$id, 
       }
     );
     return newItem;
   } catch (error) {
-    console.error('Failed to create to-do item:', error); // Log the error for debugging
+    console.error('Failed to create to-do item:', error); 
     throw new Error(error.message);
   }
 }
@@ -221,7 +245,7 @@ export async function createClient(form: {
         city: form.city,
         state: form.state,
         country: form.country,
-        creator: currentUser.$id, // Associate the client with the logged-in user
+        creator: currentUser.$id, 
       }
     );
 

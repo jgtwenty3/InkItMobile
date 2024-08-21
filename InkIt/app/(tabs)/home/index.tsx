@@ -1,9 +1,9 @@
-import { FlatList, StyleSheet, Text, View, ScrollView } from 'react-native';
+import {  StyleSheet, Text, View, ScrollView } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import CustomButton from '@/components/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import ToDoList from '@/components/ToDoList';
+import UpcomingAppointments from '@/components/UpcomingAppointments';
 
 const Home = () => {
   const navigation = useNavigation();
@@ -21,7 +21,7 @@ const Home = () => {
       {/* Bottom Half: Upcoming Appointments */}
       <View style={styles.halfContainer}>
         <Text style={styles.headerText}>Upcoming Appointments:</Text>
-        {/* Upcoming Appointments component will go here */}
+        <UpcomingAppointments/>
       </View>
     </SafeAreaView>
   );

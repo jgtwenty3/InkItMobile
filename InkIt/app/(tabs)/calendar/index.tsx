@@ -7,6 +7,7 @@ import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { useNavigation } from 'expo-router';
+import AddAppointmentModal from '@/components/AddAppointmentModal';
 
 // Your custom component for rendering timetable items
 const CalendarComponent = ({ style, item }) => (
@@ -24,34 +25,35 @@ const CalendarScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [modalVisible, setModalVisible] = useState<boolean>(false); // State for modal visibility
   const navigation = useNavigation();
 
-  // Define date range for the timetable
   const [from] = React.useState(moment().subtract(3, 'days').toDate());
   const [till] = React.useState(moment().add(3, 'days').toISOString());
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const appointmentsData = await getUserAppointments(user.$id);
-        const formattedAppointments = appointmentsData.map((appointment) => ({
-          title: appointment.title,
-          startDate: new Date(appointment.startTime),
-          endDate: new Date(appointment.endTime),
-          client: (appointment.client.fullName)
-        }));
-        setAppointments(formattedAppointments);
-        console.log(formattedAppointments)
+        if (user?.$id) {
+          const appointmentsData = await getUserAppointments(user.$id);
+          const formattedAppointments = appointmentsData.map((appointment) => ({
+            title: appointment.title,
+            startDate: new Date(appointment.startTime),
+            endDate: new Date(appointment.endTime),
+            client: appointment.client?.fullName || 'Unknown Client'
+          }));
+          setAppointments(formattedAppointments);
+        } else {
+          setError('No user ID available');
+        }
       } catch (error) {
         setError('Failed to fetch appointments');
       } finally {
         setLoading(false);
       }
     };
-
-    if (user && user.$id) {
-      fetchAppointments();
-    }
+  
+    fetchAppointments();
   }, [user]);
 
   if (loading) {
@@ -70,6 +72,14 @@ const CalendarScreen = () => {
     setCurrentDate(prevDate => moment(prevDate).add(1, 'day').toDate());
   };
 
+  const handleAddAppointment = () => {
+    setModalVisible(true); // Show the modal
+  };
+
+  const closeModal = () => {
+    setModalVisible(false); // Hide the modal
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.navigationContainer}>
@@ -80,27 +90,28 @@ const CalendarScreen = () => {
         <Button title="Next Day" onPress={handleNextDay} color="transparent" style={styles.navButton} />
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      <Timetable
-        items={appointments}
-        renderItem={(props) => <CalendarComponent {...props} />}
-        date={currentDate}
-        headerContainerStyle={styles.headerContainer}
-        headerTextStyle={styles.headerText}
-        containerStyle={styles.containerStyle}
-        timeContainerStyle={styles.timeContainer}
-        timeTextStyle={styles.timeText}
-        linesContainerStyle={styles.linesContainer}
-        nowLineDotStyle={styles.nowLineDot}
-        nowLineLineStyle={styles.nowLineLine}
-        fromHour={0}
-        toHour={24}
-        is12Hour={true}
-      />
-        
+        <Timetable
+          items={appointments}
+          renderItem={(props) => <CalendarComponent {...props} />}
+          date={currentDate}
+          headerContainerStyle={styles.headerContainer}
+          headerTextStyle={styles.headerText}
+          containerStyle={styles.containerStyle}
+          timeContainerStyle={styles.timeContainer}
+          timeTextStyle={styles.timeText}
+          linesContainerStyle={styles.linesContainer}
+          nowLineDotStyle={styles.nowLineDot}
+          nowLineLineStyle={styles.nowLineLine}
+          fromHour={0}
+          toHour={24}
+          is12Hour={true}
+        />
       </ScrollView>
       <View style={styles.buttonContainer}>
-          <CustomButton title="Add Appointment" onPress={() => navigation.navigate('AddAppointment')} />
-        </View>
+        <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
+      </View>
+      {/* AddAppointmentModal Integration */}
+      <AddAppointmentModal visible={modalVisible} onClose={closeModal} />
     </SafeAreaView>
   );
 };
@@ -140,14 +151,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
     padding: 10,
-    color:'black',
-    fontFamily:'Courier'
+    color: 'black',
+    fontFamily: 'Courier',
   },
   eventTitle: {
     color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily:'Courier'
+    fontFamily: 'Courier',
   },
   eventTime: {
     color: 'black',
@@ -175,7 +186,7 @@ const styles = StyleSheet.create({
     // Add your styles for 'now' line dot
   },
   nowLineLine: {
-    // Add your styles for 'now' line
+    color: "white",
   },
   navButton: {
     backgroundColor: 'black',
