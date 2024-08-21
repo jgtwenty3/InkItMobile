@@ -1,105 +1,129 @@
-import {StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import FormField from '@/components/FormField'
-import { useGlobalContext } from '@/app/context/GlobalProvider'
-import CustomButton from '@/components/CustomButton'
-import { router } from 'expo-router'
-import { createClient } from '@/lib/appwrite'
+import React, { useState } from 'react';
+import { SafeAreaView, Text, View, StyleSheet, Switch, Platform } from 'react-native';
+import FormField from '@/components/FormField';
+import CustomButton from '@/components/CustomButton';
+import { createClient } from '@/lib/appwrite';
+import { router } from 'expo-router';
+import { useGlobalContext } from '@/app/context/GlobalProvider';
 
 const AddClient = () => {
-
-  const {user} = useGlobalContext();
-  const [isSubmitting,setSubmission] = useState(false);
+  const { user } = useGlobalContext();
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    city:"",
-    state:"",
-    country:"",
-  })
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
+    country: '',
+    waiverSigned: false,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (isSubmitting) return; // Prevent multiple submissions
-    setSubmission(true);
+    setIsSubmitting(true);
     try {
-      const newClient = await createClient(form);
-      console.log('Client created successfully:', newClient);
+      await createClient(form);
+      resetForm(); // Reset the form after successful submission
       router.push('/clients'); // Redirect to the clients page after successful creation
     } catch (error) {
       console.error('Failed to create client:', error.message);
+      alert('Failed to add client.');
     } finally {
-      setSubmission(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const handleToggle = () => {
+    setForm({ ...form, waiverSigned: !form.waiverSigned });
+  };
+
+  const resetForm = () => {
+    setForm({
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      city: '',
+      state: '',
+      country: '',
+      waiverSigned: false,
+    });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>new client information</Text>
-      <FormField
-        title="name"
-        value={form.fullName}
-        handleChangeText={(e) => setForm({ ...form, fullName: e })}
-        placeholder="client's full name" 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-      <FormField
-        title="email"
-        value={form.email}
-        handleChangeText={(e) => setForm({ ...form, email: e })}
-        placeholder="client email" 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-      <FormField
-        title="phone number"
-        value={form.phoneNumber}
-        handleChangeText={(e) => setForm({ ...form, phoneNumber: e })}
-        placeholder="client's number" 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-      <FormField
-        title="city"
-        value={form.city}
-        handleChangeText={(e) => setForm({ ...form, city: e })}
-        placeholder="city" 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-      <FormField
-        title="state"
-        value={form.state}
-        handleChangeText={(e) => setForm({ ...form, state: e })}
-        placeholder="NY, CA, etc..." 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-      <FormField
-        title="country"
-        value={form.country}
-        handleChangeText={(e) => setForm({ ...form, country: e })}
-        placeholder="USA, Mexico, etc..." 
-        otherStyles={{ marginTop: 28, width: '90%' }}
-      />
-
-      {/* Buttons Container */}
+      <Text style={styles.title}>Add New Client</Text>
+      <View style={styles.formContainer}>
+        <FormField
+          title="Full Name"
+          value={form.fullName}
+          handleChangeText={(text) => setForm({ ...form, fullName: text })}
+          placeholder="Enter full name"
+          otherStyles={styles.formField}
+        />
+        <FormField
+          title="Email"
+          value={form.email}
+          handleChangeText={(text) => setForm({ ...form, email: text })}
+          placeholder="Enter email"
+          otherStyles={styles.formField}
+        />
+        <FormField
+          title="Phone Number"
+          value={form.phoneNumber}
+          handleChangeText={(text) => setForm({ ...form, phoneNumber: text })}
+          placeholder="Enter phone number"
+          otherStyles={styles.formField}
+        />
+        <FormField
+          title="City"
+          value={form.city}
+          handleChangeText={(text) => setForm({ ...form, city: text })}
+          placeholder="Enter city"
+          otherStyles={styles.formField}
+        />
+        <FormField
+          title="State"
+          value={form.state}
+          handleChangeText={(text) => setForm({ ...form, state: text })}
+          placeholder="Enter state"
+          otherStyles={styles.formField}
+        />
+        <FormField
+          title="Country"
+          value={form.country}
+          handleChangeText={(text) => setForm({ ...form, country: text })}
+          placeholder="Enter country"
+          otherStyles={styles.formField}
+        />
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Waiver Signed:</Text>
+          <Switch
+            value={form.waiverSigned}
+            onValueChange={handleToggle}
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={form.waiverSigned ? '#f5dd4b' : '#f4f3f4'}
+          />
+        </View>
+      </View>
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="add client"
+          title="Add Client"
           onPress={handleSubmit}
           buttonStyle={styles.customButton}
-          
         />
         <CustomButton
-          title="cancel"
-          onPress={() => router.push('/clients')}
+          title="Cancel"
+          onPress={() => {
+            resetForm(); // Reset the form on cancel
+            router.push('/clients');
+          }}
           buttonStyle={styles.customButton}
-          
         />
       </View>
     </SafeAreaView>
-  )
-}
-
-export default AddClient
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -107,29 +131,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'black',
+    padding: Platform.OS === 'ios' ? 20 : 15, // Adjust padding based on platform
   },
-  text: {
-    fontFamily: 'courier',
+  title: {
+    fontFamily: 'Courier',
     color: 'white',
+    fontSize: Platform.OS === 'ios' ? 24 : 20, // Adjust font size for tablet and mobile
     marginBottom: 20,
   },
-  mt20: {
-    marginTop: 20,
+  formContainer: {
+    width: '100%',
+    maxWidth: 600, // Maximum width for larger screens (e.g., tablets)
+    paddingHorizontal: 20,
   },
-  
-  // New styles for button container and buttons
+  formField: {
+    marginBottom: 16,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  toggleLabel: {
+    color: 'white',
+    fontFamily: 'Courier',
+    fontSize: 16,
+    marginRight: 10,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
-    width: '90%', // Ensure the container takes up 90% of the width
+    width: '100%',
+    maxWidth: 600, // Maximum width for larger screens
+    paddingHorizontal: 20,
   },
   customButton: {
-    width: '48%', // Make each button take up 48% of the container width
+    width: '48%',
     paddingVertical: 12,
-    fontFamily: 'courier',
+    fontFamily: 'Courier',
     fontSize: 16,
-    textAlign: 'center'
-     // Add vertical padding for better touch area
   },
-})
+});
+
+export default AddClient;

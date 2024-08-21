@@ -26,6 +26,7 @@ const ClientDetails = () => {
       try {
         const clientData = await getClientById(clientId);
         setClient(clientData);
+        console.log('Client Data:', clientData); // Debugging line to check data structure
       } catch (error) {
         setError('Failed to fetch client details');
       } finally {
@@ -73,7 +74,7 @@ const ClientDetails = () => {
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>;
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
@@ -87,6 +88,9 @@ const ClientDetails = () => {
         <Text style={styles.clientText}>City: {client.city}</Text>
         <Text style={styles.clientText}>State: {client.state}</Text>
         <Text style={styles.clientText}>Country: {client.country}</Text>
+        <Text style={styles.clientText}>Waiver Signed: {client.waiverSigned ? 'Yes' : 'No'}</Text>
+        <Text style={styles.clientText}>Last Appointment:</Text>
+        <Text style={styles.clientText}>Next Appointment:</Text>
       </View>
 
       {/* Reference Images Section */}
@@ -97,19 +101,19 @@ const ClientDetails = () => {
 
       <View style={styles.buttonContainer}>
         <CustomButton
-          title="edit"
+          title="Edit"
           onPress={handleEdit}
           buttonStyle={[styles.button, styles.editButton]}
         />
         <CustomButton
-          title="delete"
+          title="Delete"
           onPress={handleDelete}
           buttonStyle={[styles.button, styles.deleteButton]}
         />
-         <CustomButton
-          title="cancel"
+        <CustomButton
+          title="Cancel"
           onPress={() => router.push('/clients')}
-          buttonStyle={[styles.button, styles.deleteButton]}
+          buttonStyle={[styles.button, styles.cancelButton]}
         />
       </View>
 
@@ -143,6 +147,7 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     padding: 15,
     marginBottom: 20,
+    borderRadius: 10,
   },
   clientText: {
     color: 'white',
@@ -177,6 +182,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   deleteButton: {
+    backgroundColor: 'black',
+  },
+  cancelButton: {
     backgroundColor: 'black',
   },
 });

@@ -1,4 +1,4 @@
-import { Modal, TextInput, StyleSheet, View, Text } from 'react-native';
+import { Modal, TextInput, StyleSheet, View, Text, Switch } from 'react-native';
 import React, { useState } from 'react';
 import CustomButton from '@/components/CustomButton';
 import { updateClient } from '@/lib/appwrite';
@@ -11,9 +11,10 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
     city: client.city,
     state: client.state,
     country: client.country,
+    waiverSigned: client.waiverSigned,
   });
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setForm((prevForm) => ({ ...prevForm, [field]: value }));
   };
 
@@ -68,6 +69,15 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
             onChangeText={(text) => handleChange('country', text)}
             placeholder="Country"
           />
+          <View style={styles.toggleContainer}>
+            <Text style={styles.toggleLabel}>Waiver Signed:</Text>
+            <Switch
+              value={form.waiverSigned}
+              onValueChange={(value) => handleChange('waiverSigned', value)}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={form.waiverSigned ? '#f5dd4b' : '#f4f3f4'}
+            />
+          </View>
           <View style={styles.buttonContainer}>
             <CustomButton title="Save" onPress={handleSave} />
             <CustomButton title="Cancel" onPress={onClose} />
@@ -91,15 +101,15 @@ const styles = StyleSheet.create({
     width: '80%',
     backgroundColor: 'black',
     padding: 20,
-   
-    borderWidth:2,
-    borderColor:'white'
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 10,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color:'white'
+    color: 'white',
   },
   input: {
     height: 40,
@@ -107,7 +117,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    color:'white'
+    color: 'white',
+    borderRadius: 5,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  toggleLabel: {
+    color: 'white',
+    marginRight: 10,
+    fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',

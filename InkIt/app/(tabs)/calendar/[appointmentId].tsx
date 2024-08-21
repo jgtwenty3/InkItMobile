@@ -116,6 +116,7 @@ const AppointmentDetails = () => {
         />
       </View>
       <View>
+      <Text style={styles.title}>Reference Images:</Text>
         <ReferenceImages />
       </View>
       <View style={styles.buttonContainer}>
