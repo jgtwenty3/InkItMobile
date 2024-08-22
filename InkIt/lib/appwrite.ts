@@ -1,4 +1,4 @@
-import { Account, Avatars, Client, Databases, ID, Query, Storage } from "react-native-appwrite";
+import { Account, Avatars, Client, Databases, ID, ImageGravity, Query, Storage, } from "react-native-appwrite";
 
 export const appwriteConfig = {
   endpoint: "https://cloud.appwrite.io/v1",
@@ -10,6 +10,7 @@ export const appwriteConfig = {
   clientCollectionId: '66adaa990011a8dcd6e9',
   appointmentCollectionId: '66adaa9f0022a0ccfd62',
   toDoListCollectionId:'66c2a02c002f643033f5',
+  referenceImages:'66c6639b00092954d411',
 };
 
 export const client = new Client();
@@ -24,10 +25,7 @@ export const avatars = new Avatars(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 
-interface FileType {
-  mimeType: string;
-  [key: string]: any;
-}
+
 
 export async function createUser(email: string, password: string, username: string) {
   try {
@@ -146,7 +144,13 @@ export async function getUserToDoList(userId:string){
   }
 }
 
-export async function createAppointment(form:{startTime:string, endTime:string, title:string, depositPaid:boolean,referenceImages:[]}){
+export async function createAppointment(form: {
+  startTime: string;
+  endTime: string;
+  title: string;
+  location?: string;
+  depositPaid?: boolean;
+}) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
@@ -156,22 +160,22 @@ export async function createAppointment(form:{startTime:string, endTime:string, 
       appwriteConfig.appointmentCollectionId,
       ID.unique(),
       {
-       
-        creator:currentUser.$id,
-        startTime:form.startTime,
-        endTime:form.endTime,
-        title:form.title,
-        referenceImages:form.referenceImages,
-        depositPaid:form.depositPaid,
-
+        creator: currentUser.$id,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        title: form.title,
+        location: form.location,
+        depositPaid: form.depositPaid || false,
       }
     );
-    return newAppointment
+    return newAppointment;
   } catch (error) {
-    console.error('Failed to create appointment:', error); 
+    console.error('Failed to create appointment:', error);
     throw new Error(error.message);
   }
 }
+
+
 
 export async function createToDoListItem(form: { item: string }) {
   try {
@@ -305,12 +309,13 @@ export async function updateAppointment(
     endTime: string;
     title: string;
     location?: string; // optional if not all appointments have a location
-    referenceImages?: string[];
+    imageId:string,
+    imageUrl:URL;
     depositPaid:boolean 
   }
 ) {
   try {
-    // Update the appointment document in the database
+    
     const updatedAppointment = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.appointmentCollectionId,
@@ -319,9 +324,8 @@ export async function updateAppointment(
         startTime: form.startTime,
         endTime: form.endTime,
         title: form.title,
-        location: form.location, // include if location is provided
-        referenceImages: form.referenceImages, 
-        depositPaid: form.depositPaid,// include if reference images are provided
+        location: form.location, 
+        depositPaid: form.depositPaid,
       }
     );
 
@@ -393,53 +397,175 @@ export async function getAppointments(){
 
 
 
+export async function deleteFile(fileId: string) {
+  try {
+    await storage.deleteFile(appwriteConfig.storageId, fileId);
 
+    return { status: "ok" };
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function uploadFile(file) {
+  try {
+    const uploadedFile = await storage.createFile(
+      appwriteConfig.storageId,
+      ID.unique(),
+      file
+    );
+    return uploadedFile;
+  } catch (error) {
+    console.error('Failed to upload file:', error);
+    throw new Error(error.message);
+  }
+}
 
-// // Upload File
-// export async function uploadFile(file: FileType, type: string) {
-//   if (!file) return;
+export async function getFilePreview(fileId: string) {
+  try {
+    const fileURL = await storage.getFilePreview(
+      appwriteConfig.storageId,
+      fileId,
+      2000,
+      2000
+    );
+    return fileURL; // Ensure this is returned as a URL
+  } catch (error) {
+    console.error('Failed to get file preview:', error);
+    throw new Error(error.message);
+  }
+}
 
-//   const { mimeType, ...rest } = file;
-//   const asset = { type: mimeType, ...rest };
-
+// export async function createReferenceImage(form: {
+//   imageFile: File; // File object for the image
+//   clientId: string;
+//   appointmentId: string;
+// }) {
 //   try {
-//     const uploadedFile = await storage.createFile(
-//       appwriteConfig.storageId,
+//     const currentUser = await getCurrentUser();
+//     if (!currentUser) throw new Error("User not found");
+
+//     // Upload the image file
+//     const uploadedFile = await uploadFile(form.imageFile);
+
+//     // Create reference image document
+//     const newRefImage = await databases.createDocument(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.referenceImages,
 //       ID.unique(),
-//       asset
+//       {
+//         imageId: uploadedFile.$id,
+//         imageUrl: uploadedFile.$getUrl(), // Get URL if needed
+//         creator: currentUser.$id,
+//         client: form.clientId,
+//         appointment: form.appointmentId
+//       }
 //     );
 
-//     const fileUrl = await getFilePreview(uploadedFile.$id, type);
-//     return fileUrl;
+//     return newRefImage;
 //   } catch (error) {
+//     console.error('Failed to create reference image:', error);
 //     throw new Error(error.message);
 //   }
 // }
 
-// // Get File Preview
-// export async function getFilePreview(fileId: string, type: string) {
-//   let fileUrl;
-
+// export async function updateReferenceImage(
+//   referenceImageId: string,
+//   form: {
+//     imageFile?: File; // Optional new file object
+//     clientId?: string;
+//     appointmentId?: string;
+//   }
+// ) {
 //   try {
-//     if (type === "video") {
-//       fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
-//     } else if (type === "image") {
-//       fileUrl = storage.getFilePreview(
-//         appwriteConfig.storageId,
-//         fileId,
-//         2000,
-//         2000,
-//         "top",
-//         100
-//       );
-//     } else {
-//       throw new Error("Invalid file type");
+//     const updateFields = {};
+
+//     if (form.imageFile) {
+//       // Upload the new image file
+//       const uploadedFile = await uploadFile(form.imageFile);
+
+//       // Set update fields
+//       updateFields['imageId'] = uploadedFile.$id;
+//       updateFields['imageUrl'] = uploadedFile.$getUrl(); // Get URL if needed
 //     }
 
-//     if (!fileUrl) throw new Error("Failed to get file preview");
+//     // Update the reference image document
+//     const updatedRefImage = await databases.updateDocument(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.referenceImages,
+//       referenceImageId,
+//       {
+//         ...updateFields,
+//         client: form.clientId,
+//         appointment: form.appointmentId
+//       }
+//     );
 
-//     return fileUrl;
+//     return updatedRefImage;
 //   } catch (error) {
-//     throw new Error(error.message);
+//     console.error('Failed to update reference image:', error);
+//     throw new Error('Failed to update reference image: ' + error.message);
 //   }
 // }
+
+// export async function getReferenceImageById(referenceImageId: string) {
+//   try {
+//     const referenceImage = await databases.getDocument(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.referenceImages,
+//       referenceImageId
+//     );
+//     return referenceImage;
+//   } catch (error) {
+//     console.error('Failed to fetch reference image:', error);
+//     throw new Error('Failed to fetch reference image');
+//   }
+// }
+
+// export async function deleteReferenceImage(referenceImageId: string) {
+//   try {
+//     // Fetch the document first to get the imageId
+//     const refImage = await getReferenceImageById(referenceImageId);
+
+//     // Delete the image file from storage
+//     if (refImage.imageId) {
+//       await storage.deleteFile(appwriteConfig.storageId, refImage.imageId);
+//     }
+
+//     // Delete the reference image document
+//     await databases.deleteDocument(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.referenceImages,
+//       referenceImageId
+//     );
+
+//     return { success: true };
+//   } catch (error) {
+//     console.error('Failed to delete reference image:', error);
+//     throw new Error('Failed to delete reference image: ' + error.message);
+//   }
+// }
+
+// export async function getUserReferenceImages(userId: string) {
+//   try {
+//     const refImages = await databases.listDocuments(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.referenceImages,
+//       [Query.equal("creator", userId)]
+//     );
+//     return refImages.documents;
+//   } catch (error) {
+//     console.error('Failed to get user reference images:', error);
+//     throw new Error('Failed to get user reference images');
+//   }
+// }
+// export const getClientReferenceImages = async (clientId: string) => {
+//   try {
+//     const response = await databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.collectionId, [
+//       Query.equal('clientId', clientId),
+//     ]);
+//     return response.documents; // Returns an array of images
+//   } catch (error) {
+//     console.error('Error fetching client reference images:', error);
+//     throw new Error('Failed to fetch client reference images');
+//   }
+// };

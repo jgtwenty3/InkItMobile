@@ -54,7 +54,7 @@ const UpcomingAppointments = () => {
             </Text>
           </View>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No upcoming appointments</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>no upcoming appointments</Text>}
       />
     </ScrollView>
   );
@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: 'white',
+    fontFamily:"courier"
   },
   errorText: {
     textAlign: 'center',

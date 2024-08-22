@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, TextInput, Button } from 'react-native';
-import DatePicker from 'react-native-date-picker'
-import { createAppointment } from '@/lib/appwrite';
-import CustomButton from '@/components/CustomButton';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { createAppointment } from '@/lib/appwrite'; // Ensure the correct path to your API function
+import CustomButton from '@/components/CustomButton'; // Ensure the correct path to your CustomButton component
+import { useGlobalContext } from '@/app/context/GlobalProvider';
 
 const AddAppointmentModal = ({ visible, onClose }) => {
+  const { user } = useGlobalContext();
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
@@ -17,20 +19,14 @@ const AddAppointmentModal = ({ visible, onClose }) => {
         title,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
+        creator: user.$id,
       };
-      await createAppointment(appointmentData); // Ensure createAppointment is correctly imported
-      onClose(); // Close the modal after successful creation
+
+      await createAppointment(appointmentData);
+      onClose();
     } catch (error) {
       console.error('Failed to add appointment:', error);
     }
-  };
-
-  const showStartTimePicker = () => {
-    setShowStartPicker(true);
-  };
-
-  const showEndTimePicker = () => {
-    setShowEndPicker(true);
   };
 
   return (
@@ -42,29 +38,24 @@ const AddAppointmentModal = ({ visible, onClose }) => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          
-
-          
-          <Text style={styles.label}>type of appointment:</Text>
+          <Text style={styles.label}>Type of Appointment:</Text>
           <TextInput
             style={styles.input}
-            placeholder="consultation, tattoo, etc."
+            placeholder="Consultation, tattoo, etc."
             placeholderTextColor="#aaa"
             value={title}
             onChangeText={setTitle}
           />
 
-          
-          <Text style={styles.label}>start time:</Text>
-          <TouchableOpacity onPress={showStartTimePicker}>
-            <Text style={styles.timeText}>
-              {startTime.toLocaleString()}
-            </Text>
+          <Text style={styles.label}>Start Time:</Text>
+          <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+            <Text style={styles.input}>{startTime.toLocaleString()}</Text>
           </TouchableOpacity>
           {showStartPicker && (
-            <DatePicker
+            <DateTimePicker
               value={startTime}
               mode="datetime"
+              is24Hour={true}
               display="default"
               onChange={(event, selectedDate) => {
                 setShowStartPicker(false);
@@ -75,17 +66,15 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             />
           )}
 
-         
-          <Text style={styles.label}>end time:</Text>
-          <TouchableOpacity onPress={showEndTimePicker}>
-            <Text style={styles.timeText}>
-              {endTime.toLocaleString()}
-            </Text>
+          <Text style={styles.label}>End Time:</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+            <Text style={styles.input}>{endTime.toLocaleString()}</Text>
           </TouchableOpacity>
           {showEndPicker && (
             <DateTimePicker
               value={endTime}
               mode="datetime"
+              is24Hour={true}
               display="default"
               onChange={(event, selectedDate) => {
                 setShowEndPicker(false);
@@ -96,7 +85,6 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             />
           )}
 
-          {/* Add Appointment Button */}
           <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
           <Button title="Cancel" onPress={onClose} color="#aaa" />
         </View>
@@ -113,43 +101,27 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%', // Adjusted for a better fit
-    maxWidth: 400, // Max width to avoid too large on wider screens
-    backgroundColor: 'black', // Align with app background
+    width: '90%',
+    maxWidth: 400,
+    backgroundColor: 'black',
     borderRadius: 10,
     padding: 20,
-    borderWidth:2,
-    borderColor:'white'
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white', // Matching the app's color scheme
-    marginBottom: 15,
-    fontFamily: 'Courier', // Matching font family
+    borderWidth: 2,
+    borderColor: 'white',
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    color: 'white', // Matching the app's color scheme
-    fontFamily: 'Courier', // Matching font family
+    color: 'white',
+    fontFamily: 'Courier',
   },
   input: {
     borderBottomWidth: 1,
-    borderBottomColor: '#444', // Darker border color
+    borderBottomColor: '#444',
     marginBottom: 10,
     padding: 5,
-    color: 'white', // Matching the app's color scheme
-    fontFamily: 'Courier', // Matching font family
-  },
-  timeText: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#444', // Darker border color
-    borderRadius: 5,
-    marginBottom: 10,
-    color: 'white', // Matching the app's color scheme
-    fontFamily: 'Courier', // Matching font family
+    color: 'white',
+    fontFamily: 'Courier',
   },
 });
 

@@ -36,19 +36,19 @@ const ToDoModal: React.FC<ToDoModalProps> = ({ visible, onClose, onAdd }) => {
     >
       <View style={styles.modalBackground}>
         <View style={styles.modalContainer}>
-          <Text style={styles.title}>Add To-Do Item</Text>
+          <Text style={styles.title}>add to-do item</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter to-do item"
+            placeholder="enter to-do item"
             value={item}
             onChangeText={setItem}
           />
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleAdd}>
-              <Text style={styles.buttonText}>Add</Text>
+              <Text style={styles.buttonText}>add</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={onClose}>
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text style={styles.buttonText}>cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     },
     title: {
       fontSize: 18,
+      fontFamily:"courier",
       marginBottom: 10,
       color: 'white', // Match ToDoList text color
     },
@@ -85,7 +86,8 @@ const styles = StyleSheet.create({
       borderColor: 'white',
       borderRadius: 5,
       marginBottom: 15,
-      color: 'white', // Text color to match ToDoList
+      color: 'gray',
+      fontFamily:"courier" // Text color to match ToDoList
     },
     buttonContainer: {
       flexDirection: 'row',
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
     buttonText: {
       color: 'white', 
       textAlign: 'center',
+      fontFamily:"courier"
     },
   });
 
