@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, TextInput, Button } from 'react-native';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, TextInput, Button, SafeAreaView, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createAppointment } from '@/lib/appwrite'; // Ensure the correct path to your API function
 import CustomButton from '@/components/CustomButton'; // Ensure the correct path to your CustomButton component
@@ -12,20 +13,31 @@ const AddAppointmentModal = ({ visible, onClose }) => {
   const [endTime, setEndTime] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleAddAppointment = async () => {
+    if (!title || !startTime || !endTime) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     try {
       const appointmentData = {
         title,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
-        creator: user.$id,
+        creator: user.$id
       };
 
+      setLoading(true);
       await createAppointment(appointmentData);
       onClose();
     } catch (error) {
       console.error('Failed to add appointment:', error);
+      setError('Failed to add appointment');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,6 +97,8 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             />
           )}
 
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
           <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
           <Button title="Cancel" onPress={onClose} color="#aaa" />
         </View>
@@ -122,6 +136,11 @@ const styles = StyleSheet.create({
     padding: 5,
     color: 'white',
     fontFamily: 'Courier',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    fontSize: 14,
   },
 });
 

@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, Button, TouchableOpacity, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { getAppointmentById, updateAppointment, deleteAppointment } from '@/lib/appwrite';
+import { getAppointmentById, updateAppointment, deleteAppointment, createImage, uploadImage } from '@/lib/appwrite';
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
-import ReferenceImages from '@/components/ReferenceImages';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from "expo-image-picker"
+import { useGlobalContext } from '@/app/context/GlobalProvider';
+
 
 const AppointmentDetails = () => {
+  const { user } = useGlobalContext();
   const route = useRoute();
   const { appointmentId } = route.params;
-
-  const [appointment, setAppointment] = useState(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [appointment, setAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [depositPaid, setDepositPaid] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +28,93 @@ const AppointmentDetails = () => {
     location: '',
     depositPaid: false,
   });
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  
+  const uriToBlob = async (uri: string): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error('Failed to convert URI to Blob'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+  };
+ 
+const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.All,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
 
+  if (!result.canceled && result.assets.length > 0) {
+    const uri = result.assets[0].uri;
+    setImage(uri);
+
+    // Convert URI to Blob
+    const blob = await uriToBlob(uri);
+
+    // Extract the filename from the URI
+    const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+
+    // Determine the MIME type
+    const mimeType = result.assets[0].type || 'image/jpeg';
+
+    // Create a FormData object
+    let formData = new FormData();
+    formData.append('fileId', 'unique()'); // Generate a unique ID for the file
+    formData.append('file', blob, fileName);
+
+    // Upload the FormData to Appwrite
+    try {
+      const file = await uploadImage(); // Pass the FormData object
+      console.log('File uploaded:', file);
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+    }
+  }
+};
+
+const uploadImage = async () => {
+  if (image) {
+    let filename = image.split('/').pop();
+    let match = /\.(\w+)$/.exec(image);
+    let type = match ? `image/${match[1]}` : `image`;
+
+    let formData = new FormData();
+    formData.append('fileId', 'unique()');
+    formData.append('file', {
+      uri: image,
+      name: filename,
+      type,
+    });
+
+    try {
+      const response = await fetch(`https://cloud.appwrite.io/v1/storage/buckets/66adad96000dd26f4653/files/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'X-Appwrite-Project': '66ada1ec002ab93f9932',
+          'x-sdk-version': 'appwrite:web:10.2.0',
+        },
+        body: formData,
+        credentials: 'include',
+      });
+      const result = await response.json();
+      console.log('Upload successful', result);
+    } catch (error) {
+      console.log('Upload failed', error);
+    }
+  }
+};
+  
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
@@ -115,10 +206,15 @@ const AppointmentDetails = () => {
           trackColor={{ false: '#767577', true: '#81b0ff' }}
         />
       </View>
-      <View>
-      <Text style={styles.title}>Reference Images:</Text>
-        <ReferenceImages />
+
+      {image && (
+        <Image source={{ uri: image }} style={styles.image} />
+      )}
+
+      <View style={styles.addView}>
+        <CustomButton style={styles.addButton} title="+" onPress={pickImage} />
       </View>
+      
       <View style={styles.buttonContainer}>
         <CustomButton
           title="Edit"
@@ -137,7 +233,6 @@ const AppointmentDetails = () => {
         />
       </View>
 
-      {/* Modal for editing appointment */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -145,24 +240,50 @@ const AppointmentDetails = () => {
       >
         <SafeAreaView style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Edit Appointment</Text>
+          <Text style={styles.title}>Title:</Text>
           <TextInput
             style={styles.input}
             placeholder="Title"
             value={formData.title}
             onChangeText={(text) => setFormData({ ...formData, title: text })}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Start Time"
-            value={formData.startTime}
-            onChangeText={(text) => setFormData({ ...formData, startTime: text })}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="End Time"
-            value={formData.endTime}
-            onChangeText={(text) => setFormData({ ...formData, endTime: text })}
-          />
+          <Text style={styles.title}>Start Time:</Text>
+          <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+            <Text style={styles.input}>{moment(formData.startTime).format('MMMM Do YYYY, h:mm A')}</Text>
+          </TouchableOpacity>
+          {showStartPicker && (
+            <DateTimePicker
+              value={new Date(formData.startTime)}
+              mode="datetime"
+              is24Hour={true}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowStartPicker(false);
+                if (selectedDate) {
+                  setFormData({ ...formData, startTime: selectedDate.toISOString() });
+                }
+              }}
+            />
+          )}
+          <Text style={styles.title}>End Time:</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+            <Text style={styles.input}>{moment(formData.endTime).format('MMMM Do YYYY, h:mm A')}</Text>
+          </TouchableOpacity>
+          {showEndPicker && (
+            <DateTimePicker
+              value={new Date(formData.endTime)}
+              mode="datetime"
+              is24Hour={true}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowEndPicker(false);
+                if (selectedDate) {
+                  setFormData({ ...formData, endTime: selectedDate.toISOString() });
+                }
+              }}
+            />
+          )}
+          <Text style={styles.title}>Location:</Text>
           <TextInput
             style={styles.input}
             placeholder="Location"
@@ -224,6 +345,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
+    color:'white'
   },
   editButton: {
     backgroundColor: 'black',
@@ -296,5 +418,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     backgroundColor: 'black',
+  },
+  addView:{
+    flex: 1,
+    alignItems:"flex-end",
+    justifyContent:"flex-end",
+    marginBottom:10,
+  },
+  image: {
+    width: 200,
+    height: 200,
   },
 });

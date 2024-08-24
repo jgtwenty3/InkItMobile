@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   navButton: {
-    backgroundColor: 'black',
+    backgroundColor: 'white',
     borderColor: 'white',
     borderWidth: 1,
     color: 'white',

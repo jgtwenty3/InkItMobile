@@ -1,6 +1,7 @@
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import CustomButton from './CustomButton'
+import { getUserAppointments } from '@/lib/appwrite'
 
 const ReferenceImages = () => {
   return (
@@ -9,9 +10,7 @@ const ReferenceImages = () => {
       <View>
 
       </View>
-      <View>
-      <CustomButton title="add images" buttonStyle = {styles.button} />
-      </View>
+      
     </SafeAreaView>
   )
 }

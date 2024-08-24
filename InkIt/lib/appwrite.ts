@@ -1,4 +1,4 @@
-import { Account, Avatars, Client, Databases, ID, ImageGravity, Query, Storage, } from "react-native-appwrite";
+import { Account, Avatars, Client, Databases, ID, ImageGravity, Query, Storage, Models } from "react-native-appwrite";
 
 export const appwriteConfig = {
   endpoint: "https://cloud.appwrite.io/v1",
@@ -10,7 +10,7 @@ export const appwriteConfig = {
   clientCollectionId: '66adaa990011a8dcd6e9',
   appointmentCollectionId: '66adaa9f0022a0ccfd62',
   toDoListCollectionId:'66c2a02c002f643033f5',
-  referenceImages:'66c6639b00092954d411',
+  imagesCollectionId:'66c7dac8003d84bbe97e',
 };
 
 export const client = new Client();
@@ -150,6 +150,7 @@ export async function createAppointment(form: {
   title: string;
   location?: string;
   depositPaid?: boolean;
+  
 }) {
   try {
     const currentUser = await getCurrentUser();
@@ -166,6 +167,7 @@ export async function createAppointment(form: {
         title: form.title,
         location: form.location,
         depositPaid: form.depositPaid || false,
+        // Store clientId in the appointment document
       }
     );
     return newAppointment;
@@ -174,6 +176,7 @@ export async function createAppointment(form: {
     throw new Error(error.message);
   }
 }
+
 
 
 
@@ -309,12 +312,12 @@ export async function updateAppointment(
     endTime: string;
     title: string;
     location?: string; // optional if not all appointments have a location
-    imageId:string,
-    imageUrl:URL;
-    depositPaid:boolean 
+    depositPaid:boolean ,
+    
   }
 ) {
   try {
+    
     
     const updatedAppointment = await databases.updateDocument(
       appwriteConfig.databaseId,
@@ -326,6 +329,7 @@ export async function updateAppointment(
         title: form.title,
         location: form.location, 
         depositPaid: form.depositPaid,
+        
       }
     );
 
@@ -406,19 +410,39 @@ export async function deleteFile(fileId: string) {
     console.log(error);
   }
 }
-export async function uploadFile(file) {
+const uriToBlob = async (uri: string): Promise<Blob> => {
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  console.log('Blob created:', blob);
+  return blob;
+};
+
+export async function uploadImage(formData: FormData) {
   try {
-    const uploadedFile = await storage.createFile(
-      appwriteConfig.storageId,
-      ID.unique(),
-      file
-    );
-    return uploadedFile;
+    const response = await fetch(`https://cloud.appwrite.io/v1/storage/buckets/66adad96000dd26f4653/files/`, {
+      method: 'POST',
+      headers:{
+        "content-type": "multipart/form-data",
+        "X-Appwrite-Project": "66ada1ec002ab93f9932",
+        "x-sdk-version": "appwrite:web:10.2.0",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      // Log the response status and text for debugging
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+    }
+
+    return await response.json();
   } catch (error) {
-    console.error('Failed to upload file:', error);
-    throw new Error(error.message);
+    console.error('Upload error:', error);
+    throw error;
   }
-}
+};
+
+
 
 export async function getFilePreview(fileId: string) {
   try {
@@ -435,35 +459,35 @@ export async function getFilePreview(fileId: string) {
   }
 }
 
-// export async function createReferenceImage(form: {
-//   imageFile: File; // File object for the image
-//   clientId: string;
-//   appointmentId: string;
-// }) {
+// export async function createImage(imageFile: File) {
 //   try {
+//     // Step 1: Upload the image file to Appwrite Storage
+//     const uploadedFile = await uploadImage(imageFile);
+    
+//     // Step 2: Get the file preview URL
+//     const filePreviewUrl = await getFilePreview(uploadedFile.$id);
+    
+//     // Step 3: Get the current user
 //     const currentUser = await getCurrentUser();
-//     if (!currentUser) throw new Error("User not found");
+//     if (!currentUser) {
+//       throw new Error("Current user not found");
+//     }
 
-//     // Upload the image file
-//     const uploadedFile = await uploadFile(form.imageFile);
-
-//     // Create reference image document
-//     const newRefImage = await databases.createDocument(
+//     // Step 4: Create a new image document in the database
+//     const newImage = await databases.createDocument(
 //       appwriteConfig.databaseId,
-//       appwriteConfig.referenceImages,
+//       appwriteConfig.imagesCollectionId,
 //       ID.unique(),
 //       {
 //         imageId: uploadedFile.$id,
-//         imageUrl: uploadedFile.$getUrl(), // Get URL if needed
-//         creator: currentUser.$id,
-//         client: form.clientId,
-//         appointment: form.appointmentId
+//         imageUrl: filePreviewUrl,
+//         creator: currentUser.$id
 //       }
 //     );
 
-//     return newRefImage;
+//     return newImage;
 //   } catch (error) {
-//     console.error('Failed to create reference image:', error);
+//     console.error('Failed to create image:', error);
 //     throw new Error(error.message);
 //   }
 // }
