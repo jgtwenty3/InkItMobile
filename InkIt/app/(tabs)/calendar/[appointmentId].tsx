@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, Button, TouchableOpacity, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { getAppointmentById, updateAppointment, deleteAppointment, createImage, uploadImage } from '@/lib/appwrite';
+import { getAppointmentById, updateAppointment, deleteAppointment, getFilePreview, uploadImage, addImageToCollection } from '@/lib/appwrite';
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
@@ -46,74 +46,45 @@ const AppointmentDetails = () => {
     });
   };
  
-const pickImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.All,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-  });
-
-  if (!result.canceled && result.assets.length > 0) {
-    const uri = result.assets[0].uri;
-    setImage(uri);
-
-    // Convert URI to Blob
-    const blob = await uriToBlob(uri);
-
-    // Extract the filename from the URI
-    const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-
-    // Determine the MIME type
-    const mimeType = result.assets[0].type || 'image/jpeg';
-
-    // Create a FormData object
-    let formData = new FormData();
-    formData.append('fileId', 'unique()'); // Generate a unique ID for the file
-    formData.append('file', blob, fileName);
-
-    // Upload the FormData to Appwrite
-    try {
-      const file = await uploadImage(); // Pass the FormData object
-      console.log('File uploaded:', file);
-    } catch (err) {
-      console.error('Failed to upload image:', err);
-    }
-  }
-};
-
-const uploadImage = async () => {
-  if (image) {
-    let filename = image.split('/').pop();
-    let match = /\.(\w+)$/.exec(image);
-    let type = match ? `image/${match[1]}` : `image`;
-
-    let formData = new FormData();
-    formData.append('fileId', 'unique()');
-    formData.append('file', {
-      uri: image,
-      name: filename,
-      type,
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-
-    try {
-      const response = await fetch(`https://cloud.appwrite.io/v1/storage/buckets/66adad96000dd26f4653/files/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'X-Appwrite-Project': '66ada1ec002ab93f9932',
-          'x-sdk-version': 'appwrite:web:10.2.0',
-        },
-        body: formData,
-        credentials: 'include',
-      });
-      const result = await response.json();
-      console.log('Upload successful', result);
-    } catch (error) {
-      console.log('Upload failed', error);
+  
+    if (!result.canceled && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+  
+      // Convert URI to Blob
+      const blob = await uriToBlob(uri);
+  
+      // Extract the filename from the URI
+      const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+  
+      // Determine the MIME type
+      const mimeType = result.assets[0].type || 'image/jpeg';
+  
+      // Create a FormData object
+      let formData = new FormData();
+      formData.append('fileId', 'unique()'); // Generate a unique ID for the file
+      formData.append('file', blob, fileName);
+  
+      // Upload the FormData to Appwrite
+      try {
+        const file = await uploadImage(uri); // Use the imported function
+        console.log('File uploaded:', file);
+  
+        const userId = user?.$id || 'anonymous'; // Adjust as needed
+        await addImageToCollection(file.$id, userId);
+        console.log("Image uploaded and added to collection");
+      } catch (err) {
+        console.error('Failed to upload image:', err);
+      }
     }
-  }
-};
+  };
+
   
   useEffect(() => {
     const fetchAppointment = async () => {

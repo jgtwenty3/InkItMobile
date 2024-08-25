@@ -417,33 +417,6 @@ const uriToBlob = async (uri: string): Promise<Blob> => {
   return blob;
 };
 
-export async function uploadImage(formData: FormData) {
-  try {
-    const response = await fetch(`https://cloud.appwrite.io/v1/storage/buckets/66adad96000dd26f4653/files/`, {
-      method: 'POST',
-      headers:{
-        "content-type": "multipart/form-data",
-        "X-Appwrite-Project": "66ada1ec002ab93f9932",
-        "x-sdk-version": "appwrite:web:10.2.0",
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      // Log the response status and text for debugging
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Upload error:', error);
-    throw error;
-  }
-};
-
-
-
 export async function getFilePreview(fileId: string) {
   try {
     const fileURL = await storage.getFilePreview(
@@ -458,39 +431,66 @@ export async function getFilePreview(fileId: string) {
     throw new Error(error.message);
   }
 }
+export const uploadImage = async (imageUri) => {
+  if (!imageUri) return;
 
-// export async function createImage(imageFile: File) {
-//   try {
-//     // Step 1: Upload the image file to Appwrite Storage
-//     const uploadedFile = await uploadImage(imageFile);
-    
-//     // Step 2: Get the file preview URL
-//     const filePreviewUrl = await getFilePreview(uploadedFile.$id);
-    
-//     // Step 3: Get the current user
-//     const currentUser = await getCurrentUser();
-//     if (!currentUser) {
-//       throw new Error("Current user not found");
-//     }
+  try {
+    const filename = imageUri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename || '');
+    const type = match ? `image/${match[1]}` : `image`;
 
-//     // Step 4: Create a new image document in the database
-//     const newImage = await databases.createDocument(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.imagesCollectionId,
-//       ID.unique(),
-//       {
-//         imageId: uploadedFile.$id,
-//         imageUrl: filePreviewUrl,
-//         creator: currentUser.$id
-//       }
-//     );
+    // Convert URI to Blob
+    const blob = await uriToBlob(imageUri);
 
-//     return newImage;
-//   } catch (error) {
-//     console.error('Failed to create image:', error);
-//     throw new Error(error.message);
-//   }
-// }
+    // Create a FormData object
+    let formData = new FormData();
+    formData.append('fileId', 'unique()'); // Assuming unique ID generation logic here
+    formData.append('file', {
+      uri: imageUri,
+      name: filename || `image_${Date.now()}.jpg`,
+      type,
+    });
+
+    // Upload the image to Appwrite
+    const response = await fetch('https://cloud.appwrite.io/v1/storage/buckets/66adad96000dd26f4653/files/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-Appwrite-Project': '66ada1ec002ab93f9932',
+        'x-sdk-version': 'appwrite:web:10.2.0',
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const file = await response.json();
+    return file;
+  } catch (err) {
+    console.error('Failed to upload image:', err);
+    throw err;
+  }
+};
+
+export const addImageToCollection = async (fileId: string, userId: string) => {
+  const previewUrl = await getFilePreview(fileId);
+
+  const response = await databases.createDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.imagesCollectionId,
+    ID.unique(),
+    {
+      imageId: fileId,
+      imageUrl:previewUrl,
+      creator: userId,
+     
+    }
+  );
+  return response;
+};
 
 // export async function updateReferenceImage(
 //   referenceImageId: string,
