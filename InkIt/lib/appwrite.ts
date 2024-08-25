@@ -475,7 +475,7 @@ export const uploadImage = async (imageUri) => {
   }
 };
 
-export const addImageToCollection = async (fileId: string, userId: string) => {
+export const addImageToCollection = async (fileId: string, userId: string, appointmentId:string) => {
   const previewUrl = await getFilePreview(fileId);
 
   const response = await databases.createDocument(
@@ -486,9 +486,12 @@ export const addImageToCollection = async (fileId: string, userId: string) => {
       imageId: fileId,
       imageUrl:previewUrl,
       creator: userId,
+      appointment: [appointmentId],
+
      
     }
   );
+  console.log('Create Document Response:', response);
   return response;
 };
 

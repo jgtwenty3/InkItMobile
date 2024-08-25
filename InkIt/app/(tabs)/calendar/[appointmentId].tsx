@@ -77,7 +77,10 @@ const AppointmentDetails = () => {
         console.log('File uploaded:', file);
   
         const userId = user?.$id || 'anonymous'; // Adjust as needed
-        await addImageToCollection(file.$id, userId);
+        console.log(appointmentId)
+        c
+        
+        await addImageToCollection(file.$id, userId, appointmentId);
         console.log("Image uploaded and added to collection");
       } catch (err) {
         console.error('Failed to upload image:', err);
