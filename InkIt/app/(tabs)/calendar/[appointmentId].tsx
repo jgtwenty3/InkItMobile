@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, Button, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { getAppointmentById, updateAppointment, deleteAppointment, getFilePreview, uploadImage, addImageToCollection } from '@/lib/appwrite';
+import { getAppointmentById, updateAppointment, deleteAppointment, uploadImage, addImageToCollection } from '@/lib/appwrite';
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
-
+import ReferenceImages from '@/components/ReferenceImages';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from "expo-image-picker"
 import { useGlobalContext } from '@/app/context/GlobalProvider';
@@ -27,6 +27,7 @@ const AppointmentDetails = () => {
     title: '',
     location: '',
     depositPaid: false,
+    client:''
   });
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
@@ -78,9 +79,9 @@ const AppointmentDetails = () => {
   
         const userId = user?.$id || 'anonymous'; // Adjust as needed
         console.log(appointmentId)
-        c
         
-        await addImageToCollection(file.$id, userId, appointmentId);
+        const clientId = appointment.client.$id
+        await addImageToCollection(file.$id, userId, appointmentId, clientId);
         console.log("Image uploaded and added to collection");
       } catch (err) {
         console.error('Failed to upload image:', err);
@@ -101,6 +102,7 @@ const AppointmentDetails = () => {
           title: fetchedAppointment.title,
           location: fetchedAppointment.location || '',
           depositPaid: fetchedAppointment.depositPaid,
+          client:fetchedAppointment.client.fullName
         });
       } catch (err) {
         setError('Failed to fetch appointment');
@@ -181,9 +183,7 @@ const AppointmentDetails = () => {
         />
       </View>
 
-      {image && (
-        <Image source={{ uri: image }} style={styles.image} />
-      )}
+     <ReferenceImages appointmentId={appointmentId}/>
 
       <View style={styles.addView}>
         <CustomButton style={styles.addButton} title="+" onPress={pickImage} />
@@ -219,6 +219,13 @@ const AppointmentDetails = () => {
             style={styles.input}
             placeholder="Title"
             value={formData.title}
+            onChangeText={(text) => setFormData({ ...formData, title: text })}
+          />
+          <Text style={styles.title}>Client:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="client"
+            value={formData.client}
             onChangeText={(text) => setFormData({ ...formData, title: text })}
           />
           <Text style={styles.title}>Start Time:</Text>

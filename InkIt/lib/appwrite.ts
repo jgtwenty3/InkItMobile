@@ -313,6 +313,7 @@ export async function updateAppointment(
     title: string;
     location?: string; // optional if not all appointments have a location
     depositPaid:boolean ,
+    client:string,
     
   }
 ) {
@@ -475,7 +476,7 @@ export const uploadImage = async (imageUri) => {
   }
 };
 
-export const addImageToCollection = async (fileId: string, userId: string, appointmentId:string) => {
+export const addImageToCollection = async (fileId: string, userId: string, appointmentId:string, clientId?:string) => {
   const previewUrl = await getFilePreview(fileId);
 
   const response = await databases.createDocument(
@@ -487,6 +488,7 @@ export const addImageToCollection = async (fileId: string, userId: string, appoi
       imageUrl:previewUrl,
       creator: userId,
       appointment: [appointmentId],
+      client:clientId
 
      
     }
@@ -495,6 +497,43 @@ export const addImageToCollection = async (fileId: string, userId: string, appoi
   return response;
 };
 
+
+
+export const getClientReferenceImages = async (clientId: string) => {
+  try {
+    const response = await databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.imagesCollectionId, [
+      Query.equal('client', clientId),
+    ]);
+    return response.documents; // Returns an array of images
+  } catch (error) {
+    console.error('Error fetching client reference images:', error);
+    throw new Error('Failed to fetch client reference images');
+  }
+};
+
+export async function getUserImages(userId: string) {
+  try {
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.imagesCollectionId,
+      [
+        Query.equal('creator', userId),
+      ]
+    );
+    
+    return response.documents.map((doc: any) => ({
+      id: doc.$id,
+      imageUrl: doc.imageUrl,
+      // Include other attributes here
+      appointment: doc.appointment, // Replace with actual attribute names
+      client: doc.client,
+      // Add more attributes as needed
+    }));// Ensure 'imageUrl' is the correct field name
+  } catch (error) {
+    console.error('Error fetching user images:', error);
+    throw new Error(error.message); // Adjusted error handling
+  }
+}
 // export async function updateReferenceImage(
 //   referenceImageId: string,
 //   form: {
