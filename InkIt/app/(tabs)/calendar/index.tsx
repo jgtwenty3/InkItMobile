@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ActivityIndicator, Text, Button, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Timetable from 'react-native-calendar-timetable';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
@@ -42,13 +42,19 @@ const CalendarScreen = () => {
       try {
         if (user?.$id) {
           const appointmentsData = await getUserAppointments(user.$id);
-          const formattedAppointments = appointmentsData.map((appointment) => ({
-            id: appointment.$id,
-            title: appointment.title,
-            startDate: new Date(appointment.startTime),
-            endDate: new Date(appointment.endTime),
-            client: appointment.client?.fullName || 'Unknown Client'
-          }));
+          const formattedAppointments = appointmentsData.map((appointment) => {
+            // Assume the times are stored in UTC in the Appwrite database
+            const startDate = moment.utc(appointment.startTime).local().toDate(); // Convert UTC to local time
+            const endDate = moment.utc(appointment.endTime).local().toDate();     // Convert UTC to local time
+            
+            return {
+              id: appointment.$id,
+              title: appointment.title,
+              startDate,
+              endDate,
+              client: appointment.client?.fullName || 'Unknown Client'
+            };
+          });
           setAppointments(formattedAppointments);
         } else {
           setError('No user ID available');
@@ -59,6 +65,7 @@ const CalendarScreen = () => {
         setLoading(false);
       }
     };
+    
 
     fetchAppointments();
   }, [user]);

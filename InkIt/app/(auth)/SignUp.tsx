@@ -48,13 +48,7 @@ const SignUp = () => {
             style={styles.image}
           />
           <Text style={styles.text}>Create a new account</Text>
-          <FormField
-            title="Username"
-            value={form.username}
-            placeholder="Enter your username"
-            handleChangeText={(e) => setForm({ ...form, username: e })}
-            otherStyles={styles.mt7}
-          />
+          
           <FormField
             title="Email"
             value={form.email}
@@ -70,6 +64,7 @@ const SignUp = () => {
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles={styles.mt7}
           />
+          
           <CustomButton
             title="sign up"
             onPress={submit}

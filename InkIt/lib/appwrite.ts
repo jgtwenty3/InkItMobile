@@ -150,11 +150,13 @@ export async function createAppointment(form: {
   title: string;
   location?: string;
   depositPaid?: boolean;
-  
 }) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
+
+    const startTimeISO = new Date(form.startTime).toISOString();
+    const endTimeISO = new Date(form.endTime).toISOString();
 
     const newAppointment = await databases.createDocument(
       appwriteConfig.databaseId,
@@ -162,12 +164,11 @@ export async function createAppointment(form: {
       ID.unique(),
       {
         creator: currentUser.$id,
-        startTime: form.startTime,
-        endTime: form.endTime,
+        startTime: startTimeISO,
+        endTime: endTimeISO,
         title: form.title,
         location: form.location,
         depositPaid: form.depositPaid || false,
-        // Store clientId in the appointment document
       }
     );
     return newAppointment;
@@ -176,6 +177,7 @@ export async function createAppointment(form: {
     throw new Error(error.message);
   }
 }
+
 
 
 
@@ -311,25 +313,24 @@ export async function updateAppointment(
     startTime: string;
     endTime: string;
     title: string;
-    location?: string; // optional if not all appointments have a location
-    depositPaid:boolean ,
-    
+    location?: string;
+    depositPaid: boolean;
   }
 ) {
   try {
-    
-    
+    const startTimeISO = new Date(form.startTime).toISOString();
+    const endTimeISO = new Date(form.endTime).toISOString();
+
     const updatedAppointment = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.appointmentCollectionId,
       appointmentId,
       {
-        startTime: form.startTime,
-        endTime: form.endTime,
+        startTime: startTimeISO,
+        endTime: endTimeISO,
         title: form.title,
-        location: form.location, 
+        location: form.location,
         depositPaid: form.depositPaid,
-        
       }
     );
 
@@ -339,6 +340,7 @@ export async function updateAppointment(
     throw new Error('Failed to update appointment: ' + error.message);
   }
 }
+
 
 export async function deleteClient(clientId:string){
   try {
@@ -494,6 +496,20 @@ export const addImageToCollection = async (fileId: string, userId: string, appoi
   console.log('Create Document Response:', response);
   return response;
 };
+
+export async function getUserImages(userId:string){
+  try {
+    const clients = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.imagesCollectionId,
+      [Query.equal("creator", userId),]
+    );
+    return clients.documents
+  }
+  catch(error){
+    throw new Error(error)
+  }
+}
 
 // export async function updateReferenceImage(
 //   referenceImageId: string,

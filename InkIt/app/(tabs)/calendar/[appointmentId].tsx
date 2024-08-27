@@ -5,10 +5,11 @@ import { getAppointmentById, updateAppointment, deleteAppointment, getFilePrevie
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
-
+import { formatDateString, multiFormatDateString } from '@/utils/utils';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from "expo-image-picker"
 import { useGlobalContext } from '@/app/context/GlobalProvider';
+import ReferenceImages from '@/components/ReferenceImages';
 
 
 const AppointmentDetails = () => {
@@ -78,7 +79,7 @@ const AppointmentDetails = () => {
   
         const userId = user?.$id || 'anonymous'; // Adjust as needed
         console.log(appointmentId)
-        c
+        
         
         await addImageToCollection(file.$id, userId, appointmentId);
         console.log("Image uploaded and added to collection");
@@ -94,6 +95,7 @@ const AppointmentDetails = () => {
       try {
         const fetchedAppointment = await getAppointmentById(appointmentId);
         setAppointment(fetchedAppointment);
+        console.log('fetched appointment:',fetchedAppointment)
         setDepositPaid(fetchedAppointment.depositPaid);
         setFormData({
           startTime: fetchedAppointment.startTime,
@@ -160,8 +162,11 @@ const AppointmentDetails = () => {
     );
   }
 
-  const formattedStartTime = moment(appointment.startTime).format('MMMM Do YYYY, h:mm A');
-  const formattedEndTime = moment(appointment.endTime).format('MMMM Do YYYY, h:mm A');
+  const formattedStartTime = formatDateString(appointment.startTime);
+  const formattedEndTime = formatDateString(appointment.endTime);
+  const relativeStartTime = multiFormatDateString(appointment.startTime);
+  const relativeEndTime = multiFormatDateString(appointment.endTime);
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -169,6 +174,7 @@ const AppointmentDetails = () => {
       <Text style={styles.time}>
         {formattedStartTime} - {formattedEndTime}
       </Text>
+      
       <Text style={styles.location}>Location: {appointment.location}</Text>
       <Text style={styles.client}>Client: {appointment.client?.fullName || 'Unknown'}</Text>
       <View style={styles.switchContainer}>
@@ -181,9 +187,7 @@ const AppointmentDetails = () => {
         />
       </View>
 
-      {image && (
-        <Image source={{ uri: image }} style={styles.image} />
-      )}
+      <ReferenceImages appointmentId={appointmentId}/>
 
       <View style={styles.addView}>
         <CustomButton style={styles.addButton} title="+" onPress={pickImage} />
