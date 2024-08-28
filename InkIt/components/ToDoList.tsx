@@ -18,7 +18,7 @@ const ToDoList = () => {
     const fetchToDoList = async () => {
       try {
         const toDoListData = await getUserToDoList(user.$id);
-        console.log('To-Do List Data:', toDoListData);
+        
         setToDoList(toDoListData);
       } catch (error) {
         setError('Failed to fetch to-do list');

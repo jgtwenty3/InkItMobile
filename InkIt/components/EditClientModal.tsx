@@ -12,6 +12,7 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
     state: client.state,
     country: client.country,
     waiverSigned: client.waiverSigned,
+    notes:client.notes,
   });
 
   const handleChange = (field: string, value: string | boolean) => {

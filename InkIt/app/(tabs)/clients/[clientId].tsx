@@ -4,14 +4,16 @@ import {
   Text,
   View,
   ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { getClientById, deleteClient } from '@/lib/appwrite';
+import { getClientById, deleteClient, updateClient } from '@/lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
-import EditClientModal from '@/components/EditClientModal'; // Import your existing EditClientModal
-
+import EditClientModal from '@/components/EditClientModal';
+import AddNoteModal from '@/components/AddNotesModal';
 
 const ClientDetails = () => {
   const route = useRoute();
@@ -19,14 +21,14 @@ const ClientDetails = () => {
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const [isAddNoteModalVisible, setIsAddNoteModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchClient = async () => {
       try {
         const clientData = await getClientById(clientId);
         setClient(clientData);
-        console.log('Client Data:', clientData); // Debugging line to check data structure
       } catch (error) {
         setError('Failed to fetch client details');
       } finally {
@@ -47,15 +49,38 @@ const ClientDetails = () => {
   };
 
   const handleEdit = () => {
-    setIsModalVisible(true);
+    setIsEditModalVisible(true);
   };
 
   const handleSave = async (updatedClientData: any) => {
     try {
       setClient(updatedClientData);
-      setIsModalVisible(false);
+      setIsEditModalVisible(false);
     } catch (error) {
       console.error('Failed to update client:', error.message);
+    }
+  };
+
+  const handleAddNote = async (note: string) => {
+    try {
+      const updatedNotes = [...client.notes, note];
+      const updatedClientData = { ...client, notes: updatedNotes };
+      await updateClient(clientId, updatedClientData);
+      setClient(updatedClientData);
+      setIsAddNoteModalVisible(false);
+    } catch (error) {
+      console.error('Failed to add note:', error.message);
+    }
+  };
+
+  const handleDeleteNote = async (noteIndex: number) => {
+    try {
+      const updatedNotes = client.notes.filter((_: string, index: number) => index !== noteIndex);
+      const updatedClientData = { ...client, notes: updatedNotes };
+      await updateClient(clientId, updatedClientData);
+      setClient(updatedClientData);
+    } catch (error) {
+      console.error('Failed to delete note:', error.message);
     }
   };
 
@@ -81,19 +106,44 @@ const ClientDetails = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
-        <Text style={styles.clientText}>Full Name: {client.fullName}</Text>
-        <Text style={styles.clientText}>Email: {client.email}</Text>
-        <Text style={styles.clientText}>Phone Number: {client.phoneNumber}</Text>
-        <Text style={styles.clientText}>City: {client.city}</Text>
-        <Text style={styles.clientText}>State: {client.state}</Text>
-        <Text style={styles.clientText}>Country: {client.country}</Text>
-        <Text style={styles.clientText}>Waiver Signed: {client.waiverSigned ? 'Yes' : 'No'}</Text>
-        <Text style={styles.clientText}>Last Appointment:</Text>
-        <Text style={styles.clientText}>Next Appointment:</Text>
+      <View style={styles.contentContainer}>
+        <View style={styles.innerContainer}>
+          <Text style={styles.clientText}>Full Name: {client.fullName}</Text>
+          <Text style={styles.clientText}>Email: {client.email}</Text>
+          <Text style={styles.clientText}>Phone Number: {client.phoneNumber}</Text>
+          <Text style={styles.clientText}>City: {client.city}</Text>
+          <Text style={styles.clientText}>State: {client.state}</Text>
+          <Text style={styles.clientText}>Country: {client.country}</Text>
+          <Text style={styles.clientText}>Waiver Signed: {client.waiverSigned ? 'Yes' : 'No'}</Text>
+          <Text style={styles.clientText}>Last Appointment:</Text>
+          <Text style={styles.clientText}>Next Appointment:</Text>
+        </View>
+        <View>
+          <Text style={styles.notesTitle}>Notes:</Text>
+          <FlatList
+            data={client.notes}
+            keyExtractor={(item, index) => `${item}-${index}`}
+            renderItem={({ item, index }) => (
+              <View style={styles.noteContainer}>
+                <TouchableOpacity
+                  style={styles.deleteNoteButton}
+                  onPress={() => handleDeleteNote(index)}
+                >
+                  <Text style={styles.deleteNoteButtonText}>x</Text>
+                </TouchableOpacity>
+                <Text style={styles.noteText}>{item}</Text>
+              </View>
+            )}
+          />
+        </View>
+        <View style={styles.addButtonContainer}>
+          <CustomButton
+            style={styles.addButton}
+            title="+"
+            onPress={() => setIsAddNoteModalVisible(true)}
+          />
+        </View>
       </View>
-
-  
       <View style={styles.buttonContainer}>
         <CustomButton
           title="Edit"
@@ -111,41 +161,37 @@ const ClientDetails = () => {
           buttonStyle={[styles.button, styles.cancelButton]}
         />
       </View>
-
-      {/* EditClientModal integration */}
       <EditClientModal
-        visible={isModalVisible}
+        visible={isEditModalVisible}
         client={client}
-        onClose={() => setIsModalVisible(false)}
+        onClose={() => setIsEditModalVisible(false)}
         onSave={handleSave}
+      />
+      <AddNoteModal
+        visible={isAddNoteModalVisible}
+        onClose={() => setIsAddNoteModalVisible(false)}
+        onSave={handleAddNote}
       />
     </SafeAreaView>
   );
 };
 
-export default ClientDetails;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    padding: 20,
-    
   },
-  loadingContainer: {
+  contentContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
+    padding: 20,
   },
   innerContainer: {
     borderWidth: 2,
     borderColor: 'white',
     padding: 15,
-    marginBottom: 20,
     borderRadius: 10,
-    justifyContent:'flex-end'
-  
+    width: '100%',
+    maxWidth: 400,
   },
   clientText: {
     color: 'white',
@@ -164,13 +210,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  referenceImagesContainer: {
-    marginBottom: 20,
+  notesTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    fontFamily: 'courier',
+    marginTop:10,
+  },
+  noteContainer: {
+    backgroundColor: 'black',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 8,
+    position: 'relative',
+  },
+  noteText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'courier',
+  },
+  deleteNoteButton: {
+    position: 'absolute',
+    right: 1,
+    paddingRight: 3,
+    zIndex: 1,
+  },
+  deleteNoteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 'auto',
+    padding: 20,
+    backgroundColor: 'black', // Optional: match background color
   },
   button: {
     flex: 1,
@@ -185,4 +260,20 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: 'black',
   },
+  addButtonContainer: {
+    position: 'absolute',
+    bottom: 1,
+    right: 20,
+    zIndex: 1,
+  },
+  addButton: {
+    backgroundColor: '#81b0ff',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
+
+export default ClientDetails;

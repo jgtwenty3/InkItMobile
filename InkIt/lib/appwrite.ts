@@ -251,6 +251,7 @@ export async function createClient(form: {
   state: string;
   country: string;
   waiverSigned:boolean
+  notes:[];
 }) {
   try {
     //  get the current user to associate the client with the logged-in user
@@ -270,7 +271,8 @@ export async function createClient(form: {
         state: form.state,
         country: form.country,
         creator: currentUser.$id, 
-        waiverSigned:form.waiverSigned
+        waiverSigned:form.waiverSigned,
+        notes:form.notes
       }
     );
 
@@ -374,6 +376,7 @@ export async function updateClient(clientId: string, form: {
   state: string;
   country: string;
   waiverSigned:boolean,
+  notes:[]
 }) {
   try {
     // Update the client document in the database
@@ -388,7 +391,8 @@ export async function updateClient(clientId: string, form: {
         city: form.city,
         state: form.state,
         country: form.country,
-        waiverSigned:form.waiverSigned
+        waiverSigned:form.waiverSigned,
+        notes:form.notes
       }
     );
 
