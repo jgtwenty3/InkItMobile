@@ -13,9 +13,9 @@ const Home = () => {
       {/* Top Half: To Do List */}
       <View style={styles.halfContainer}>
         <Text style={styles.headerText}>To Do:</Text>
-        <ScrollView style={styles.listContainer} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.listContainer} contentContainerStyle={styles.scrollContent}>
           <ToDoList />
-        </ScrollView>
+        </View>
       </View>
 
       {/* Bottom Half: Upcoming Appointments */}

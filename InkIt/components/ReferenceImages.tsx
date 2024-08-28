@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, StyleSheet, Text, Image, View, FlatList, useWindowDimensions, Modal, TouchableOpacity } from 'react-native';
-import { addImageToCollection, getUserImages, uploadImage } from '@/lib/appwrite';
+import { addImageToCollection, getUserImages, uploadImage, deleteImage } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import CustomButton from './CustomButton';
 import * as ImagePicker from "expo-image-picker";
@@ -50,10 +50,25 @@ const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
     setModalVisible(true);
   };
 
+  const handleDeleteImage = async (imageId: string) => {
+    try {
+      await deleteImage(imageId);
+      setImages(images.filter(image => image.id !== imageId));
+      console.log('Image deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+    }
+  };
+
   const renderGridItem = ({ item }: { item: ImageData }) => (
-    <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.gridItem}>
-      <Image source={{ uri: item.imageUrl }} style={styles.gridImage} resizeMode="cover" />
-    </TouchableOpacity>
+    <View style={styles.gridItem}>
+      <TouchableOpacity onPress={() => handleImagePress(item)} style={styles.imageContainer}>
+        <Image source={{ uri: item.imageUrl }} style={styles.gridImage} resizeMode="cover" />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteImage(item.id)}>
+        <Text style={styles.deleteButtonText}>X</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   const renderModalItem = ({ item }: { item: ImageData }) => (
@@ -248,6 +263,23 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor:"gray",
+    padding: 5,
+    borderRadius: 15,
+    zIndex: 2,
+  },
+  deleteButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  imageContainer: {
+    position: 'relative',
   },
 });
 

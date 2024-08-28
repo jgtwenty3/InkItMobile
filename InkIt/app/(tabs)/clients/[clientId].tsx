@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
     borderRadius: 10,
+    justifyContent:'flex-end'
   
   },
   clientText: {

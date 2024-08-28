@@ -13,7 +13,7 @@ const UpcomingAppointments = () => {
     const fetchAppointments = async () => {
       try {
         const appointmentsData = await getUserAppointments(user.$id);
-        console.log('Appointment data', appointmentsData);
+        
         // Filter out past appointments
         const upcomingAppointments = appointmentsData.filter((appointment) => {
           const endTime = new Date(appointment.endTime);
