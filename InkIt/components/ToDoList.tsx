@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { useNavigation } from 'expo-router';
@@ -62,7 +62,7 @@ const ToDoList = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         data={toDoList}
         keyExtractor={(item) => item.$id}
@@ -80,7 +80,7 @@ const ToDoList = () => {
       />
       <View style={styles.buttonView}>
         <CustomButton
-          title="add to list"
+          title="Add to List"
           onPress={handleAddToDoItem}
           buttonStyle={styles.button}
         />
@@ -90,7 +90,7 @@ const ToDoList = () => {
         onClose={() => setModalVisible(false)}
         onAdd={refreshToDoList}
       />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'black',
     borderRadius: 5,
-    borderColor:'white',
-    borderWidth:1,
+    borderColor: 'white',
+    borderWidth: 1,
   },
   deleteText: {
     color: 'white',

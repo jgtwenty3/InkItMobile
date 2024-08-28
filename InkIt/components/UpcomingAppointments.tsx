@@ -42,7 +42,7 @@ const UpcomingAppointments = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         data={appointments}
         keyExtractor={(item) => item.$id}
@@ -56,7 +56,7 @@ const UpcomingAppointments = () => {
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>no upcoming appointments</Text>}
       />
-    </ScrollView>
+    </View>
   );
 };
 

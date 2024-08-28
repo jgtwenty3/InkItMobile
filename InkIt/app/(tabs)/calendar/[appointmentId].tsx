@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, Button, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, SafeAreaView, Switch, Modal, TextInput, TouchableOpacity } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { getAppointmentById, updateAppointment, deleteAppointment, getFilePreview, uploadImage, addImageToCollection } from '@/lib/appwrite';
+
+import { getAppointmentById, updateAppointment, deleteAppointment, getUserClients } from '@/lib/appwrite';
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
 import { formatDateString, multiFormatDateString } from '@/utils/utils';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from "expo-image-picker"
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import ReferenceImages from '@/components/ReferenceImages';
-
 
 const AppointmentDetails = () => {
   const { user } = useGlobalContext();
   const route = useRoute();
   const { appointmentId } = route.params;
-  const [image, setImage] = useState<string | null>(null);
   const [appointment, setAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,96 +26,43 @@ const AppointmentDetails = () => {
     title: '',
     location: '',
     depositPaid: false,
+    clientId: '',
   });
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  
-  const uriToBlob = async (uri: string): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function () {
-        reject(new Error('Failed to convert URI to Blob'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-  };
  
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-  
-    if (!result.canceled && result.assets.length > 0) {
-      const uri = result.assets[0].uri;
-  
-      // Convert URI to Blob
-      const blob = await uriToBlob(uri);
-  
-      // Extract the filename from the URI
-      const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-  
-      // Determine the MIME type
-      const mimeType = result.assets[0].type || 'image/jpeg';
-  
-      // Create a FormData object
-      let formData = new FormData();
-      formData.append('fileId', 'unique()'); // Generate a unique ID for the file
-      formData.append('file', blob, fileName);
-  
-      // Upload the FormData to Appwrite
-      try {
-        const file = await uploadImage(uri); // Use the imported function
-        console.log('File uploaded:', file);
-  
-        const userId = user?.$id || 'anonymous'; // Adjust as needed
-        console.log(appointmentId)
-        
-        
-        await addImageToCollection(file.$id, userId, appointmentId);
-        console.log("Image uploaded and added to collection");
-      } catch (err) {
-        console.error('Failed to upload image:', err);
-      }
+
+  const fetchAppointment = async () => {
+    try {
+      const fetchedAppointment = await getAppointmentById(appointmentId);
+      setAppointment(fetchedAppointment);
+      setDepositPaid(fetchedAppointment.depositPaid);
+      setFormData({
+        startTime: fetchedAppointment.startTime,
+        endTime: fetchedAppointment.endTime,
+        title: fetchedAppointment.title,
+        location: fetchedAppointment.location || '',
+        depositPaid: fetchedAppointment.depositPaid,
+        clientId: fetchedAppointment.client?.id || '',
+      });
+    } catch (err) {
+      setError('Failed to fetch appointment');
+    } finally {
+      setLoading(false);
     }
   };
 
-  
   useEffect(() => {
-    const fetchAppointment = async () => {
-      try {
-        const fetchedAppointment = await getAppointmentById(appointmentId);
-        setAppointment(fetchedAppointment);
-        console.log('fetched appointment:',fetchedAppointment)
-        setDepositPaid(fetchedAppointment.depositPaid);
-        setFormData({
-          startTime: fetchedAppointment.startTime,
-          endTime: fetchedAppointment.endTime,
-          title: fetchedAppointment.title,
-          location: fetchedAppointment.location || '',
-          depositPaid: fetchedAppointment.depositPaid,
-        });
-      } catch (err) {
-        setError('Failed to fetch appointment');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAppointment();
   }, [appointmentId]);
+
+  
 
   const handleToggle = async () => {
     try {
       const updatedAppointment = await updateAppointment(appointmentId, { depositPaid: !depositPaid });
       setDepositPaid(updatedAppointment.depositPaid);
+      fetchAppointment(); // Refresh data after update
     } catch (err) {
       setError('Failed to update deposit status');
     }
@@ -129,13 +74,27 @@ const AppointmentDetails = () => {
 
   const handleUpdate = async () => {
     try {
+      console.log('Updating with formData:', formData);
       const updatedAppointment = await updateAppointment(appointmentId, formData);
+      console.log('Updated Appointment:', updatedAppointment);
+  
+    
+  
       setAppointment(updatedAppointment);
       setIsModalVisible(false);
+  
+      // Fetch the updated appointment to ensure the client's name is updated
+      const fetchedAppointment = await getAppointmentById(appointmentId);
+      console.log('Fetched Updated Appointment:', fetchedAppointment);
+  
+      setAppointment(fetchedAppointment);
+  
     } catch (err) {
+      console.error('Error updating appointment:', err);
       setError('Failed to update appointment');
     }
   };
+  
 
   const handleDelete = async () => {
     try {
@@ -164,8 +123,7 @@ const AppointmentDetails = () => {
 
   const formattedStartTime = formatDateString(appointment.startTime);
   const formattedEndTime = formatDateString(appointment.endTime);
-  const relativeStartTime = multiFormatDateString(appointment.startTime);
-  const relativeEndTime = multiFormatDateString(appointment.endTime);
+
 
 
   return (
@@ -174,7 +132,6 @@ const AppointmentDetails = () => {
       <Text style={styles.time}>
         {formattedStartTime} - {formattedEndTime}
       </Text>
-      
       <Text style={styles.location}>Location: {appointment.location}</Text>
       <Text style={styles.client}>Client: {appointment.client?.fullName || 'Unknown'}</Text>
       <View style={styles.switchContainer}>
@@ -182,17 +139,13 @@ const AppointmentDetails = () => {
         <Switch
           value={depositPaid}
           onValueChange={handleToggle}
-          thumbColor={depositPaid ? '#f5dd4b' : '#f4f3f4'}
-          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={depositPaid ? 'black' : 'white'}
+          trackColor={{ false: 'black', true: 'white' }}
         />
       </View>
 
-      <ReferenceImages appointmentId={appointmentId}/>
+      <ReferenceImages appointmentId={appointmentId} />
 
-      <View style={styles.addView}>
-        <CustomButton style={styles.addButton} title="+" onPress={pickImage} />
-      </View>
-      
       <View style={styles.buttonContainer}>
         <CustomButton
           title="Edit"
@@ -225,6 +178,7 @@ const AppointmentDetails = () => {
             value={formData.title}
             onChangeText={(text) => setFormData({ ...formData, title: text })}
           />
+          
           <Text style={styles.title}>Start Time:</Text>
           <TouchableOpacity onPress={() => setShowStartPicker(true)}>
             <Text style={styles.input}>{moment(formData.startTime).format('MMMM Do YYYY, h:mm A')}</Text>
@@ -285,7 +239,6 @@ const AppointmentDetails = () => {
     </SafeAreaView>
   );
 };
-
 export default AppointmentDetails;
 
 const styles = StyleSheet.create({
@@ -293,6 +246,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: 'black',
+    
   },
   loadingContainer: {
     flex: 1,
@@ -323,7 +277,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
-    color:'white'
+    color: 'white',
   },
   editButton: {
     backgroundColor: 'black',
@@ -397,12 +351,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: 'black',
   },
-  addView:{
-    flex: 1,
-    alignItems:"flex-end",
-    justifyContent:"flex-end",
-    marginBottom:10,
-  },
+  
   image: {
     width: 200,
     height: 200,

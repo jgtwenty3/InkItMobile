@@ -1,33 +1,33 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, StyleSheet, Text, Image, View, FlatList, useWindowDimensions, Modal, TouchableOpacity } from 'react-native';
-import { addImageToCollection, getUserImages, uploadImage } from '@/lib/appwrite';
+import { getUserImages } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
-import CustomButton from './CustomButton';
-import * as ImagePicker from "expo-image-picker";
 
 interface ImageData {
   id: string;
   imageUrl: string;
   appointment: string;
-  client: string;
+  client: { $id: string }[]; // Adjusted to match the expected data structure
 }
 
-const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
+const ClientImages = ({ clientId }: { clientId: string }) => {
   const [images, setImages] = useState<ImageData[]>([]);
   const [selectedImage, setSelectedImage] = useState<ImageData | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { user } = useGlobalContext();
   const { width } = useWindowDimensions();
 
+  // Fetch images from the backend and filter by client ID
   const fetchImages = useCallback(async () => {
     try {
       const data = await getUserImages(user.$id);
 
+      // Assuming data is an array of image objects
       const filteredImages = data.filter((image: any) => {
-        const appointments = image.appointment || [];
-        return appointments.some((appointment: any) => appointment.$id === appointmentId);
+        return image.client.some((client: any) => client.$id === clientId);
       });
 
+      // Map the filtered images to match the ImageData interface
       const formattedImages = filteredImages.map((image: any) => ({
         id: image.$id,
         imageUrl: image.imageUrl,
@@ -39,7 +39,7 @@ const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
     } catch (error) {
       console.error('Error fetching images:', error);
     }
-  }, [appointmentId, user.$id]);
+  }, [clientId, user.$id]);
 
   useEffect(() => {
     fetchImages();
@@ -62,70 +62,22 @@ const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
     </View>
   );
 
-  const uriToBlob = async (uri: string): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function () {
-        reject(new Error('Failed to convert URI to Blob'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-  };
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      const uri = result.assets[0].uri;
-      const blob = await uriToBlob(uri);
-      const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-      const mimeType = result.assets[0].type || 'image/jpeg';
-
-      let formData = new FormData();
-      formData.append('fileId', 'unique()');
-      formData.append('file', blob, fileName);
-
-      try {
-        const file = await uploadImage(uri);
-        const userId = user?.$id || 'anonymous';
-
-        await addImageToCollection(file.$id, userId, appointmentId);
-        await fetchImages();
-      } catch (err) {
-        console.error('Failed to upload image:', err);
-      }
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Reference Images:</Text>
       {images.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No images available for this appointment.</Text>
+          <Text style={styles.emptyText}>No images available for this client.</Text>
         </View>
       ) : (
         <FlatList
           data={images}
           renderItem={renderGridItem}
           keyExtractor={(item) => item.id}
-          numColumns={3}
+          numColumns={3} 
           contentContainerStyle={styles.grid}
         />
       )}
-      <View style={styles.addButtonContainer}>
-        <CustomButton style={styles.addButton} title="+" onPress={pickImage} />
-      </View>
 
       <Modal
         visible={modalVisible}
@@ -140,22 +92,9 @@ const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
             keyExtractor={(item) => item.id}
             horizontal
             pagingEnabled
-            initialScrollIndex={Math.max(0, images.findIndex(image => image.id === selectedImage?.id))}
-            getItemLayout={(data, index) => ({
-              length: width,
-              offset: width * index,
-              index,
-            })}
+            initialScrollIndex={images.findIndex(image => image.id === selectedImage?.id)}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.modalGallery}
-            onScrollToIndexFailed={(info) => {
-              console.warn(`Failed to scroll to index: ${info.index}, trying again...`);
-              setTimeout(() => {
-                if (images.length > 0) {
-                  info?.flatListRef?.scrollToIndex({ index: info.index, animated: true });
-                }
-              }, 100); // Retry after a delay
-            }}
           />
           <TouchableOpacity
             style={styles.closeButton}
@@ -169,12 +108,12 @@ const ReferenceImages = ({ appointmentId }: { appointmentId: string }) => {
   );
 };
 
+export default ClientImages;
+
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-    backgroundColor: 'black',
-    position: 'relative',
-    flex: 1,
+    backgroundColor: 'black', // To better display white text and images
   },
   title: {
     fontSize: 18,
@@ -190,14 +129,15 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 5,
     aspectRatio: 1,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderColor: 'gray', // Debugging border
+    borderWidth: 1, // Debugging border
   },
   gridImage: {
     width: '100%',
     height: '100%',
     borderRadius: 10,
   },
+
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -219,7 +159,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalImage: {
-    height: 300,
+    height: 300, // Adjust as needed
     width: '100%',
     borderRadius: 10,
   },
@@ -235,20 +175,4 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
-  addButtonContainer: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    zIndex: 1,
-  },
-  addButton: {
-    backgroundColor: '#81b0ff',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
-
-export default ReferenceImages;

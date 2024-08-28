@@ -216,6 +216,18 @@ export async function deleteToDoListItem(toDoListItemId:string){
     throw new Error('Failed to delete item: ' + error.message);
   }
 }
+export async function deleteImage(imageId:string){
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.imagesCollectionId,
+      imageId,
+    )
+    return { success: true }
+  } catch (error) {
+    throw new Error('Failed to delete image: ' + error.message);
+  }
+}
 
 export async function getUserClients(userId:string){
   try {
@@ -318,16 +330,15 @@ export async function updateAppointment(
   }
 ) {
   try {
-    const startTimeISO = new Date(form.startTime).toISOString();
-    const endTimeISO = new Date(form.endTime).toISOString();
+ 
 
     const updatedAppointment = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.appointmentCollectionId,
       appointmentId,
       {
-        startTime: startTimeISO,
-        endTime: endTimeISO,
+        startTime: form.startTime,
+        endTime: form.endTime,
         title: form.title,
         location: form.location,
         depositPaid: form.depositPaid,

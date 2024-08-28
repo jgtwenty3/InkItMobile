@@ -11,7 +11,7 @@ import { getClientById, deleteClient } from '@/lib/appwrite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '@/components/CustomButton';
 import EditClientModal from '@/components/EditClientModal'; // Import your existing EditClientModal
-import ReferenceImages from '@/components/ReferenceImages';// Import ReferenceImages component
+
 
 const ClientDetails = () => {
   const route = useRoute();
@@ -93,12 +93,7 @@ const ClientDetails = () => {
         <Text style={styles.clientText}>Next Appointment:</Text>
       </View>
 
-      {/* Reference Images Section */}
-      <View style={styles.referenceImagesContainer}>
-        <Text style={styles.clientText}>Reference Images:</Text>
-        <ReferenceImages />
-      </View>
-
+  
       <View style={styles.buttonContainer}>
         <CustomButton
           title="Edit"
@@ -134,7 +129,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    padding: 15,
+    padding: 20,
+    
   },
   loadingContainer: {
     flex: 1,
@@ -148,6 +144,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
     borderRadius: 10,
+  
   },
   clientText: {
     color: 'white',
