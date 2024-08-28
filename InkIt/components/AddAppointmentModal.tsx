@@ -28,6 +28,7 @@ const AddAppointmentModal = ({ visible, onClose }) => {
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         creator: user.$id
+        
       };
 
       setLoading(true);
@@ -101,7 +102,7 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             style={styles.input}
             placeholder="shop name"
             placeholderTextColor="#aaa"
-            value={title}
+           
             onChangeText={setTitle}
           />
           <Text style={styles.label}>client:</Text>
@@ -109,7 +110,7 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             style={styles.input}
             placeholder="client name"
             placeholderTextColor="#aaa"
-            value={title}
+            
             onChangeText={setTitle}
           />
 
