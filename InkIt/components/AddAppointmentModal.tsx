@@ -50,16 +50,16 @@ const AddAppointmentModal = ({ visible, onClose }) => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.label}>Type of Appointment:</Text>
+          <Text style={styles.label}>type of appointment:</Text>
           <TextInput
             style={styles.input}
-            placeholder="Consultation, tattoo, etc."
+            placeholder="consultation, tattoo, etc."
             placeholderTextColor="#aaa"
             value={title}
             onChangeText={setTitle}
           />
 
-          <Text style={styles.label}>Start Time:</Text>
+          <Text style={styles.label}>start time:</Text>
           <TouchableOpacity onPress={() => setShowStartPicker(true)}>
             <Text style={styles.input}>{startTime.toLocaleString()}</Text>
           </TouchableOpacity>
@@ -78,7 +78,7 @@ const AddAppointmentModal = ({ visible, onClose }) => {
             />
           )}
 
-          <Text style={styles.label}>End Time:</Text>
+          <Text style={styles.label}>end time:</Text>
           <TouchableOpacity onPress={() => setShowEndPicker(true)}>
             <Text style={styles.input}>{endTime.toLocaleString()}</Text>
           </TouchableOpacity>
@@ -96,11 +96,30 @@ const AddAppointmentModal = ({ visible, onClose }) => {
               }}
             />
           )}
+          <Text style={styles.label}>location:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="shop name"
+            placeholderTextColor="#aaa"
+            value={title}
+            onChangeText={setTitle}
+          />
+          <Text style={styles.label}>client:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="client name"
+            placeholderTextColor="#aaa"
+            value={title}
+            onChangeText={setTitle}
+          />
 
           {error && <Text style={styles.errorText}>{error}</Text>}
+          <View style = {styles.buttonContainer}>
+          <CustomButton title="add appointment" onPress={handleAddAppointment} />
+          <CustomButton  title="cancel" onPress={onClose}  />
+          </View>
 
-          <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
-          <Button title="Cancel" onPress={onClose} color="#aaa" />
+          
         </View>
       </View>
     </Modal>
@@ -122,6 +141,11 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 2,
     borderColor: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 'auto',
   },
   label: {
     fontSize: 16,

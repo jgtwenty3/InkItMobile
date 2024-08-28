@@ -224,19 +224,25 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'black',
   },
   modalGallery: {
     flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   imageContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
   },
   modalImage: {
-    height: 300,
-    width: '100%',
+    height: "90%",
+    width: '100%', // Adjust this width as needed to fit your design
     borderRadius: 10,
+    marginTop:50,
   },
   closeButton: {
     position: 'absolute',

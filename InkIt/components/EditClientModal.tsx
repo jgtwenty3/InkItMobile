@@ -33,45 +33,45 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Edit Client Details</Text>
+          <Text style={styles.modalTitle}>edit client details</Text>
           <TextInput
             style={styles.input}
             value={form.fullName}
             onChangeText={(text) => handleChange('fullName', text)}
-            placeholder="Full Name"
+            placeholder="full name"
           />
           <TextInput
             style={styles.input}
             value={form.email}
             onChangeText={(text) => handleChange('email', text)}
-            placeholder="Email"
+            placeholder="email"
           />
           <TextInput
             style={styles.input}
             value={form.phoneNumber}
             onChangeText={(text) => handleChange('phoneNumber', text)}
-            placeholder="Phone Number"
+            placeholder="phone number"
           />
           <TextInput
             style={styles.input}
             value={form.city}
             onChangeText={(text) => handleChange('city', text)}
-            placeholder="City"
+            placeholder="city"
           />
           <TextInput
             style={styles.input}
             value={form.state}
             onChangeText={(text) => handleChange('state', text)}
-            placeholder="State"
+            placeholder="state"
           />
           <TextInput
             style={styles.input}
             value={form.country}
             onChangeText={(text) => handleChange('country', text)}
-            placeholder="Country"
+            placeholder="country"
           />
           <View style={styles.toggleContainer}>
-            <Text style={styles.toggleLabel}>Waiver Signed:</Text>
+            <Text style={styles.toggleLabel}>waiver signed:</Text>
             <Switch
               value={form.waiverSigned}
               onValueChange={(value) => handleChange('waiverSigned', value)}
@@ -80,8 +80,8 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
             />
           </View>
           <View style={styles.buttonContainer}>
-            <CustomButton title="Save" onPress={handleSave} />
-            <CustomButton title="Cancel" onPress={onClose} />
+            <CustomButton title="save" onPress={handleSave} />
+            <CustomButton title="cancel" onPress={onClose} />
           </View>
         </View>
       </View>
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     color: 'white',
+    fontFamily:"courier"
   },
   input: {
     height: 40,
@@ -120,6 +121,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     color: 'white',
     borderRadius: 5,
+    fontFamily:"courier"
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -130,6 +132,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginRight: 10,
     fontSize: 16,
+    fontFamily:"courier"
   },
   buttonContainer: {
     flexDirection: 'row',

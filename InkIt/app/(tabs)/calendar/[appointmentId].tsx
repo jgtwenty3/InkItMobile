@@ -165,77 +165,85 @@ const AppointmentDetails = () => {
       </View>
 
       <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Edit Appointment</Text>
-          <Text style={styles.title}>Title:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Title"
-            value={formData.title}
-            onChangeText={(text) => setFormData({ ...formData, title: text })}
-          />
-          
-          <Text style={styles.title}>Start Time:</Text>
-          <TouchableOpacity onPress={() => setShowStartPicker(true)}>
-            <Text style={styles.input}>{moment(formData.startTime).format('MMMM Do YYYY, h:mm A')}</Text>
-          </TouchableOpacity>
-          {showStartPicker && (
-            <DateTimePicker
-              value={new Date(formData.startTime)}
-              mode="datetime"
-              is24Hour={true}
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowStartPicker(false);
-                if (selectedDate) {
-                  setFormData({ ...formData, startTime: selectedDate.toISOString() });
-                }
-              }}
-            />
-          )}
-          <Text style={styles.title}>End Time:</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)}>
-            <Text style={styles.input}>{moment(formData.endTime).format('MMMM Do YYYY, h:mm A')}</Text>
-          </TouchableOpacity>
-          {showEndPicker && (
-            <DateTimePicker
-              value={new Date(formData.endTime)}
-              mode="datetime"
-              is24Hour={true}
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowEndPicker(false);
-                if (selectedDate) {
-                  setFormData({ ...formData, endTime: selectedDate.toISOString() });
-                }
-              }}
-            />
-          )}
-          <Text style={styles.title}>Location:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={formData.location}
-            onChangeText={(text) => setFormData({ ...formData, location: text })}
-          />
-          <View style={styles.modalButtonContainer}>
-            <CustomButton
-              title="Update"
-              onPress={handleUpdate}
-              buttonStyle={styles.modalButton}
-            />
-            <CustomButton
-              title="Cancel"
-              onPress={() => setIsModalVisible(false)}
-              buttonStyle={styles.modalButton}
-            />
+          visible={isModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setIsModalVisible(false)}
+          >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>edit appointment</Text>
+              
+              <Text style={styles.label}>title:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="consultation, tattoo"
+                value={formData.title}
+                onChangeText={(text) => setFormData({ ...formData, title: text })}
+              />
+
+              <Text style={styles.label}>start time:</Text>
+              <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+                <Text style={styles.input}>{moment(formData.startTime).format('MMMM Do YYYY, h:mm A')}</Text>
+              </TouchableOpacity>
+              {showStartPicker && (
+                <DateTimePicker
+                  value={new Date(formData.startTime)}
+                  mode="datetime"
+                  is24Hour={true}
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowStartPicker(false);
+                    if (selectedDate) {
+                      setFormData({ ...formData, startTime: selectedDate.toISOString() });
+                    }
+                  }}
+                />
+              )}
+
+              <Text style={styles.label}>end time:</Text>
+              <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+                <Text style={styles.input}>{moment(formData.endTime).format('MMMM Do YYYY, h:mm A')}</Text>
+              </TouchableOpacity>
+              {showEndPicker && (
+                <DateTimePicker
+                  value={new Date(formData.endTime)}
+                  mode="datetime"
+                  is24Hour={true}
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowEndPicker(false);
+                    if (selectedDate) {
+                      setFormData({ ...formData, endTime: selectedDate.toISOString() });
+                    }
+                  }}
+                />
+              )}
+
+              <Text style={styles.label}>location:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="shop name"
+                value={formData.location}
+                onChangeText={(text) => setFormData({ ...formData, location: text })}
+              />
+
+              <View style={styles.modalButtonContainer}>
+                <CustomButton
+                  title="update"
+                  onPress={handleUpdate}
+                  buttonStyle={styles.modalButton}
+                />
+                <CustomButton
+                  title="cancel"
+                  onPress={() => setIsModalVisible(false)}
+                  buttonStyle={styles.modalButton}
+                />
+              </View>
+            </View>
           </View>
-        </SafeAreaView>
-      </Modal>
+        </Modal>
+
     </SafeAreaView>
   );
 };
@@ -268,6 +276,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'courier',
     padding: 5,
+  },
+  label: {
+    fontSize: 16,
+    color: 'white',
+    marginBottom: 5,
+    fontFamily:"courier"
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -325,8 +339,9 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    padding: 20,
-    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
   },
   modalTitle: {
     fontSize: 24,
@@ -335,11 +350,21 @@ const styles = StyleSheet.create({
     fontFamily: 'courier',
     marginBottom: 20,
   },
+  modalContent: {
+    width: '90%',
+    backgroundColor: 'black',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+    borderWidth:2,
+    borderColor:"white"
+  },
   input: {
     backgroundColor: 'white',
     borderRadius: 5,
     marginBottom: 15,
     padding: 10,
+    fontFamily:"courier"
   },
   modalButtonContainer: {
     flexDirection: 'row',
@@ -350,6 +375,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     backgroundColor: 'black',
+    color: 'white',
   },
   
   image: {

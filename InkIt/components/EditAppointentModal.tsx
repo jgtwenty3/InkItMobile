@@ -21,8 +21,8 @@ const EditAppointmentModal = ({ isVisible, onClose, appointment, onUpdate }) => 
   return (
     <Modal visible={isVisible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.modalContainer}>
-        <Text style={styles.modalTitle}>Edit Appointment</Text>
-        <Text style={styles.title}>Title:</Text>
+        <Text style={styles.modalTitle}>edit appointment</Text>
+        <Text style={styles.title}>title:</Text>
         <TextInput
           style={styles.input}
           placeholder="Title"
