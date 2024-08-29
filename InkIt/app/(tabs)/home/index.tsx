@@ -12,7 +12,7 @@ const Home = () => {
     <SafeAreaView style={styles.container}>
       {/* Top Half: To Do List */}
       <View style={styles.halfContainer}>
-        <Text style={styles.headerText}>To Do:</Text>
+        <Text style={styles.headerText}>to-do:</Text>
         <View style={styles.listContainer} contentContainerStyle={styles.scrollContent}>
           <ToDoList />
         </View>
@@ -20,7 +20,7 @@ const Home = () => {
 
       {/* Bottom Half: Upcoming Appointments */}
       <View style={styles.halfContainer}>
-        <Text style={styles.headerText}>Upcoming Appointments:</Text>
+        <Text style={styles.headerText}>upcoming appointments:</Text>
         <UpcomingAppointments/>
       </View>
     </SafeAreaView>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     flex: 1, // Takes up half the screen
     justifyContent: 'flex-start', // Align content at the top
     alignItems: 'center',
-    paddingTop: 10, // Add a little padding at the top
+    paddingTop: 20, // Add a little padding at the top
   },
   headerText: {
     fontFamily: 'courier',

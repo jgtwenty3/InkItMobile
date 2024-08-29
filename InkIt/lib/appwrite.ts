@@ -151,6 +151,7 @@ export async function createAppointment(form: {
   location?: string;
   depositPaid?: boolean;
   client?: string;
+  notes?:string
 
 }) {
   try {
@@ -172,6 +173,7 @@ export async function createAppointment(form: {
         location: form.location,
         depositPaid: form.depositPaid || false,
         client: form.client,
+        notes:form.notes
       }
     );
     return newAppointment;

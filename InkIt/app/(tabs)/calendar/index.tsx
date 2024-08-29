@@ -100,6 +100,8 @@ const CalendarScreen = () => {
   };
 
   const handleDateSelect = (day) => {
+    const selectedMonth = day.dateString.slice(0, 7);
+    setCurrentMonth(selectedMonth);
     setSelectedDate(day.dateString);
     setViewType('calendar');
   };
@@ -111,6 +113,7 @@ const CalendarScreen = () => {
       {viewType === 'calendar' ? (
         <>
           <Calendar
+            current={currentMonth}
             markedDates={markedDates}
             markingType="multi-dot"
             onDayPress={handleDayPress}
@@ -209,7 +212,8 @@ const CalendarScreen = () => {
       )}
 
       <View style={styles.buttonContainer}>
-        <CustomButton title="Add Appointment" onPress={handleAddAppointment} />
+        <CustomButton title="add appointment" onPress={handleAddAppointment} />
+        
       </View>
       <AddAppointmentModal visible={modalVisible} onClose={closeModal} />
     </SafeAreaView>

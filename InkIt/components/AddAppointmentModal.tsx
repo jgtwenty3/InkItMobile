@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { createAppointment, getUserClients } from '@/lib/appwrite'; // Ensure correct paths to your API functions
+import { createAppointment, getUserClients, createClient } from '@/lib/appwrite'; // Ensure correct paths to your API functions
 import CustomButton from '@/components/CustomButton'; // Ensure correct path to your CustomButton component
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 
@@ -16,9 +16,24 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState('');
   const [clients, setClients] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [fetchingClients, setFetchingClients] = useState(true);
+  const [addingNewClient, setAddingNewClient] = useState(false);
+
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+
+  const [newClientDetails, setNewClientDetails] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
+    country: '',
+    waiverSigned: false,
+    notes: [],
+  });
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -50,7 +65,9 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
         location,
-        client: selectedClient.$id, // Pass the selected client ID
+        notes,
+        client: selectedClient.$id,
+         // Pass the selected client ID
       };
 
       setLoading(true);
@@ -63,6 +80,28 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
       setLoading(false);
     }
   };
+  const handleAddNewClient = async () => {
+    const { fullName, email, phoneNumber, city, state, country } = newClientDetails;
+
+    if (!fullName || !email || !phoneNumber || !city || !state || !country) {
+      setError('Please fill in all client fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const newClient = await createClient(newClientDetails);
+      setClients([...clients, newClient]); // Add new client to the list
+      setSelectedClient(newClient); // Automatically select the new client
+      setAddingNewClient(false); // Close the new client form
+    } catch (error) {
+      console.error('Failed to add new client:', error);
+      setError('Failed to add new client');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <Modal
@@ -141,7 +180,7 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
                 <TouchableOpacity
                   style={styles.dropdownItem}
                   onPress={() => {
-                    setSelectedClient(item); // Store the entire client object
+                    setSelectedClient(item);
                     setShowClientDropdown(false);
                   }}
                 >
@@ -150,6 +189,71 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
               )}
             />
           )}
+          <TouchableOpacity
+            onPress={() => setAddingNewClient(!addingNewClient)}
+            style={styles.addNewClientButton}
+          >
+            <Text style={styles.addNewClientText}>+ new client</Text>
+          </TouchableOpacity>
+
+          {addingNewClient && (
+            <View style={styles.newClientForm}>
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.fullName}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, fullName: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.email}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, email: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Phone Number"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.phoneNumber}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, phoneNumber: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="City"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.city}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, city: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="State"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.state}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, state: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Country"
+                placeholderTextColor="#aaa"
+                value={newClientDetails.country}
+                onChangeText={(text) => setNewClientDetails({ ...newClientDetails, country: text })}
+              />
+              <TouchableOpacity onPress={handleAddNewClient} style={styles.saveClientButton}>
+                <Text style={styles.saveClientText}>Save Client</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <Text style={styles.label}>Notes:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Notes"
+            placeholderTextColor="#aaa"
+            value={newClientDetails.notes.join(', ')}
+            onChangeText={(text) => setNewClientDetails({ ...newClientDetails, notes: [text] })}
+          />
 
           {error && <Text style={styles.errorText}>{error}</Text>}
           {loading && <ActivityIndicator size="small" color="#fff" />}
@@ -190,6 +294,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Courier',
   },
+  addNewClientButton: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  addNewClientText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontFamily:"courier"
+  },
   input: {
     borderBottomWidth: 1,
     borderBottomColor: '#444',
@@ -197,6 +310,19 @@ const styles = StyleSheet.create({
     padding: 5,
     color: 'white',
     fontFamily: 'Courier',
+  },
+  saveClientButton: {
+    backgroundColor: 'black',
+    padding: 10,
+    marginTop: 10,
+    borderRadius: 5,
+    borderColor:"white",
+    borderWidth:2
+  },
+  saveClientText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontFamily:"courier"
   },
   dropdown: {
     borderBottomWidth: 1,
