@@ -216,7 +216,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     fontFamily: 'courier',
-    marginTop:10,
+    marginTop:50,
+    marginLeft:2
   },
   noteContainer: {
     backgroundColor: 'black',
@@ -224,6 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
     position: 'relative',
+    marginLeft:2,
   },
   noteText: {
     color: 'white',

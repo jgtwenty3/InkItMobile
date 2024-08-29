@@ -3,6 +3,7 @@ import { StatusBar } from "react-native";
 import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGlobalContext } from "./context/GlobalProvider";
+import CustomButton from "@/components/CustomButton";
 
 
 
@@ -19,8 +20,8 @@ export default function App() {
         style={styles.image}
       />
       <StatusBar/>
-      <Button title = "Login" color = "white"  onPress={()=>router.push("/SignIn")}/>
-      <Button title = "Sign Up" color = "white" onPress={()=>router.push("/SignUp")}/>
+      <CustomButton title = "Login"   onPress={()=>router.push("/SignIn")}/>
+      <CustomButton title = "Sign Up"  onPress={()=>router.push("/SignUp")}/>
       
     </SafeAreaView>
   );

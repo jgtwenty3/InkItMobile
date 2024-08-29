@@ -58,7 +58,7 @@ const ToDoList = () => {
 
   if (error) {
     Alert.alert('Error', error);
-    return <Text style={styles.errorText}>Failed to load To-Do List</Text>;
+    return <Text style={styles.errorText}>failed to load To-Do list</Text>;
   }
 
   return (
@@ -76,11 +76,11 @@ const ToDoList = () => {
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No To-Do items found.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>no To-Do items found.</Text>}
       />
       <View style={styles.buttonView}>
         <CustomButton
-          title="Add to List"
+          title="add to list"
           onPress={handleAddToDoItem}
           buttonStyle={styles.button}
         />
@@ -122,8 +122,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'black',
     borderRadius: 5,
-    borderColor: 'white',
-    borderWidth: 1,
+    
   },
   deleteText: {
     color: 'white',

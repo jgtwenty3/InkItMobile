@@ -1,19 +1,34 @@
 import { Modal, TextInput, StyleSheet, View, Text, Switch } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomButton from '@/components/CustomButton';
 import { updateClient } from '@/lib/appwrite';
 
 const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; visible: boolean; onClose: () => void; onSave: (updatedClient: any) => void }) => {
   const [form, setForm] = useState({
-    fullName: client.fullName,
-    email: client.email,
-    phoneNumber: client.phoneNumber,
-    city: client.city,
-    state: client.state,
-    country: client.country,
-    waiverSigned: client.waiverSigned,
-    notes:client.notes,
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    city: '',
+    state: '',
+    country: '',
+    waiverSigned: false,
+    notes: '',
   });
+
+  useEffect(() => {
+    if (client) {
+      setForm({
+        fullName: client.fullName || '',
+        email: client.email || '',
+        phoneNumber: client.phoneNumber || '',
+        city: client.city || '',
+        state: client.state || '',
+        country: client.country || '',
+        waiverSigned: client.waiverSigned || false,
+        notes: client.notes || '',
+      });
+    }
+  }, [client]);
 
   const handleChange = (field: string, value: string | boolean) => {
     setForm((prevForm) => ({ ...prevForm, [field]: value }));
@@ -33,55 +48,56 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>edit client details</Text>
+          <Text style={styles.modalTitle}>Edit Client Details</Text>
           <TextInput
             style={styles.input}
             value={form.fullName}
             onChangeText={(text) => handleChange('fullName', text)}
-            placeholder="full name"
+            placeholder="Full Name"
           />
           <TextInput
             style={styles.input}
             value={form.email}
             onChangeText={(text) => handleChange('email', text)}
-            placeholder="email"
+            placeholder="Email"
           />
           <TextInput
             style={styles.input}
             value={form.phoneNumber}
             onChangeText={(text) => handleChange('phoneNumber', text)}
-            placeholder="phone number"
+            placeholder="Phone Number"
           />
           <TextInput
             style={styles.input}
             value={form.city}
             onChangeText={(text) => handleChange('city', text)}
-            placeholder="city"
+            placeholder="City"
           />
           <TextInput
             style={styles.input}
             value={form.state}
             onChangeText={(text) => handleChange('state', text)}
-            placeholder="state"
+            placeholder="State"
           />
           <TextInput
             style={styles.input}
             value={form.country}
             onChangeText={(text) => handleChange('country', text)}
-            placeholder="country"
+            placeholder="Country"
           />
           <View style={styles.toggleContainer}>
-            <Text style={styles.toggleLabel}>waiver signed:</Text>
+            <Text style={styles.toggleLabel}>Waiver Signed:</Text>
             <Switch
               value={form.waiverSigned}
               onValueChange={(value) => handleChange('waiverSigned', value)}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={form.waiverSigned ? '#f5dd4b' : '#f4f3f4'}
+              trackColor={{ false: 'black', true: 'white' }}
+              
+              thumbColor={form.waiverSigned ? 'black' : 'white'}
             />
           </View>
           <View style={styles.buttonContainer}>
-            <CustomButton title="save" onPress={handleSave} />
-            <CustomButton title="cancel" onPress={onClose} />
+            <CustomButton title="Save" onPress={handleSave} />
+            <CustomButton title="Cancel" onPress={onClose} />
           </View>
         </View>
       </View>
@@ -111,7 +127,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     color: 'white',
-    fontFamily:"courier"
+    fontFamily: "courier"
   },
   input: {
     height: 40,
@@ -121,7 +137,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     color: 'white',
     borderRadius: 5,
-    fontFamily:"courier"
+    fontFamily: "courier"
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -132,7 +148,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginRight: 10,
     fontSize: 16,
-    fontFamily:"courier"
+    fontFamily: "courier"
   },
   buttonContainer: {
     flexDirection: 'row',

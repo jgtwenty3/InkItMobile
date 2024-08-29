@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, View, ActivityIndicator, Alert } from 'react-native';
+import { FlatList, StyleSheet, Text, View, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { getUserAppointments } from '@/lib/appwrite';
+import { useRouter } from 'expo-router'; // Import the useRouter hook
 
 const UpcomingAppointments = () => {
   const { user } = useGlobalContext();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -41,20 +43,24 @@ const UpcomingAppointments = () => {
     return <Text style={styles.errorText}>Failed to load appointments</Text>;
   }
 
+  const handlePress = (id: string) => {
+    router.push(`/calendar/${id}`); // Navigate to the detailed appointment view
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
         data={appointments}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <View style={styles.appointmentItem}>
+          <TouchableOpacity onPress={() => handlePress(item.$id)} style={styles.appointmentItem}>
             <Text style={styles.appointmentTitle}>{item.title}</Text>
             <Text style={styles.appointmentTime}>
               {new Date(item.startTime).toLocaleString()} - {new Date(item.endTime).toLocaleString()}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>no upcoming appointments</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>No upcoming appointments</Text>}
       />
     </View>
   );
@@ -89,7 +95,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: 'white',
-    fontFamily:"courier"
+    fontFamily: 'courier',
   },
   errorText: {
     textAlign: 'center',

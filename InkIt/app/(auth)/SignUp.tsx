@@ -47,20 +47,20 @@ const SignUp = () => {
             source={require('../../assets/images/inkit.png')}
             style={styles.image}
           />
-          <Text style={styles.text}>Create a new account</Text>
+          <Text style={styles.text}>create a new account</Text>
           
           <FormField
             title="Email"
             value={form.email}
-            placeholder="Enter your email"
+            placeholder="enter your email"
             handleChangeText={(e) => setForm({ ...form, email: e })}
             otherStyles={styles.mt7}
             keyboardType="email-address"
           />
           <FormField
-            title="Password"
+            title="password"
             value={form.password}
-            placeholder="Enter your password"
+            placeholder="enter your password"
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles={styles.mt7}
           />

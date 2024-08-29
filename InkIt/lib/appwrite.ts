@@ -150,6 +150,8 @@ export async function createAppointment(form: {
   title: string;
   location?: string;
   depositPaid?: boolean;
+  client?: string;
+
 }) {
   try {
     const currentUser = await getCurrentUser();
@@ -169,6 +171,7 @@ export async function createAppointment(form: {
         title: form.title,
         location: form.location,
         depositPaid: form.depositPaid || false,
+        client: form.client,
       }
     );
     return newAppointment;

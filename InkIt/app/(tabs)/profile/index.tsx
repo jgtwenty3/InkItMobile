@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  console.log(user)
+  
 
   const logout = async () => {
     await signOut();

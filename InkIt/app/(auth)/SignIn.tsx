@@ -45,7 +45,7 @@ const SignIn = () => {
       />
       
       <FormField
-            title="Email"
+            title="email"
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
             placeholder="email" 
@@ -54,7 +54,7 @@ const SignIn = () => {
           />
 
           <FormField
-            title="Password"
+            title="password"
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             placeholder="enter your password" 
