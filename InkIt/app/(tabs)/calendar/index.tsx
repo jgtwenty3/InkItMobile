@@ -1,59 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View, ActivityIndicator, SafeAreaView, TouchableOpacity, Text } from 'react-native';
 import moment from 'moment-timezone';
 import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { router } from 'expo-router';
 import AddAppointmentModal from '@/components/AddAppointmentModal';
-import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
+import CalendarListModal from '@/components/CalendarListModal';
+import { Calendar } from 'react-native-big-calendar';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const CalendarScreen = () => {
   const { user } = useGlobalContext();
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'));
-  const [markedDates, setMarkedDates] = useState<any>({});
-  const [viewType, setViewType] = useState<'calendar' | 'calendarList'>('calendar');
-  const [currentMonth, setCurrentMonth] = useState<string>(moment().format('YYYY-MM'));
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [calendarMode, setCalendarMode] = useState('3days'); // Default mode
+  const [currentDate, setCurrentDate] = useState(moment().startOf('month').toDate());
+  const [calendarListModalVisible, setCalendarListModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         if (user?.$id) {
           const appointmentsData = await getUserAppointments(user.$id);
-          const formattedAppointments = appointmentsData.reduce((acc, appointment) => {
-            const startDate = moment.utc(appointment.startTime).local().format('YYYY-MM-DD');
-            const event = {
-              id: appointment.$id,
-              title: appointment.title,
-              startTime: moment.utc(appointment.startTime).local().format('h:mm A'),
-              endTime: moment.utc(appointment.endTime).local().format('h:mm A'),
-              client: appointment.client?.fullName || 'Unknown Client',
-              startTimestamp: moment.utc(appointment.startTime).valueOf(),
-            };
-
-            if (!acc[startDate]) {
-              acc[startDate] = [];
-            }
-            acc[startDate].push(event);
-
-            acc[startDate].sort((a, b) => a.startTimestamp - b.startTimestamp);
-
-            return acc;
-          }, {});
+          const formattedAppointments = appointmentsData.map((appointment) => ({
+            id: appointment.$id,
+            title: `${appointment.title} w/ ${appointment.client?.fullName || 'Unknown Client'}`,
+            start: moment.utc(appointment.startTime).local().toDate(),
+            end: moment.utc(appointment.endTime).local().toDate(),
+          }));
 
           setAppointments(formattedAppointments);
-
-          const marked = Object.keys(formattedAppointments).reduce((acc, date) => {
-            acc[date] = { dots: [{ key: 'appointments', color: 'white' }] };
-            return acc;
-          }, {});
-
-          setMarkedDates(marked);
         } else {
           setError('No user ID available');
         }
@@ -70,7 +49,7 @@ const CalendarScreen = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffffff" />
+        <ActivityIndicator size="large" color="white" />
       </SafeAreaView>
     );
   }
@@ -83,139 +62,70 @@ const CalendarScreen = () => {
     setModalVisible(false);
   };
 
-  const renderAppointment = (item) => (
-    <TouchableOpacity style={styles.eventItem} onPress={() => router.push(`/calendar/${item.id}`)}>
-      <Text style={styles.eventTitle}>{item.title} w/{item.client}</Text>
-      <Text style={styles.eventTime}>{item.startTime} - {item.endTime}</Text>
-    </TouchableOpacity>
-  );
-
-  const handleDayPress = (day) => {
-    setSelectedDate(day.dateString);
-    setViewType('calendar');
+  const toggleCalendarMode = () => {
+    const modes = ['week', '3days', 'day'];
+    const nextModeIndex = (modes.indexOf(calendarMode) + 1) % modes.length;
+    setCalendarMode(modes[nextModeIndex]);
   };
 
-  const handleMonthChange = (month) => {
-    setCurrentMonth(`${month.year}-${month.month < 10 ? `0${month.month}` : month.month}`);
+  const changeMonth = (direction) => {
+    const newDate = moment(currentDate).add(direction, 'month').toDate();
+    setCurrentDate(newDate);
   };
 
-  const handleDateSelect = (day) => {
-    const selectedMonth = day.dateString.slice(0, 7);
-    setCurrentMonth(selectedMonth);
-    setSelectedDate(day.dateString);
-    setViewType('calendar');
+  const handleSelectDate = (selectedDate) => {
+    setCurrentDate(moment(selectedDate).toDate());
   };
-
-  const filteredAppointments = { [selectedDate]: appointments[selectedDate] || [] };
 
   return (
     <SafeAreaView style={styles.container}>
-      {viewType === 'calendar' ? (
-        <>
-          <Calendar
-            current={currentMonth}
-            markedDates={markedDates}
-            markingType="multi-dot"
-            onDayPress={handleDayPress}
-            onMonthChange={handleMonthChange}
-            theme={{
-              backgroundColor: 'black',
-              calendarBackground: 'black',
-              textSectionTitleColor: 'white',
-              dayTextColor: 'white',
-              todayTextColor: 'white',
-              selectedDayBackgroundColor: 'white',
-              selectedDayTextColor: 'black',
-              dotColor: 'white',
-              selectedDotColor: 'black',
-              monthTextColor: 'white',
-              indicatorColor: 'white',
-              textDayFontFamily: 'courier',
-              textMonthFontFamily: 'courier',
-              textDayHeaderFontFamily: 'courier',
-              textDayHeaderFontWeight: 'bold',
-              arrowColor: 'white'
-            }}
-            style={styles.calendar}
-          />
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity style={styles.toggleButton} onPress={() => setViewType('calendarList')}>
-              <Text style={styles.toggleButtonText}>month list</Text>
-            </TouchableOpacity>
-          </View>
-          <Agenda
-            items={filteredAppointments}
-            renderItem={renderAppointment}
-            selected={selectedDate}
-            pastScrollRange={3}
-            futureScrollRange={3}
-            rowHasChanged={(r1, r2) => r1.id !== r2.id}
-            onDayPress={handleDayPress}
-            theme={{
-              backgroundColor: 'black',
-              calendarBackground: 'black',
-              textSectionTitleColor: 'black',
-              dayTextColor: 'black',
-              todayTextColor: 'black',
-              selectedDayBackgroundColor: 'black',
-              selectedDayTextColor: 'black',
-              dotColor: 'white',
-              selectedDotColor: 'black',
-              agendaDayTextColor: 'white',
-              agendaDayNumColor: 'white',
-              agendaTodayColor: 'white',
-              agendaKnobColor: 'black',
-              monthTextColor: 'white',
-              indicatorColor: 'white',
-              textDayFontFamily: 'courier',
-              reservationsBackgroundColor: 'black',
-              textMonthFontFamily: 'courier',
-              textDayHeaderFontFamily: 'courier',
-              textDayHeaderFontWeight: 'bold',
-            }}
-            style={styles.agenda}
-          />
-        </>
-      ) : (
-        <>
-          <CalendarList
-            current={currentMonth}
-            onDayPress={handleDateSelect}
-            markedDates={markedDates}
-            markingType="multi-dot"
-            theme={{
-              backgroundColor: 'black',
-              calendarBackground: 'black',
-              textSectionTitleColor: 'white',
-              dayTextColor: 'white',
-              todayTextColor: 'white',
-              selectedDayBackgroundColor: 'white',
-              selectedDayTextColor: 'black',
-              dotColor: 'white',
-              selectedDotColor: 'black',
-              monthTextColor: 'white',
-              indicatorColor: 'white',
-              textDayFontFamily: 'courier',
-              textMonthFontFamily: 'courier',
-              textDayHeaderFontFamily: 'courier',
-              textDayHeaderFontWeight: 'bold',
-              arrowColor: 'white'
-            }}
-            style={styles.calendarList}
-          />
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity style={styles.toggleButton} onPress={() => setViewType('calendar')}>
-              <Text style={styles.toggleButtonText}>back to calendar</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setCalendarListModalVisible(true)} style={styles.selectDateButton}>
+          <Text style={styles.selectDateText}>
+            {moment(currentDate).format('MMMM YYYY')}
+          </Text>
+          <Icon name="arrow-drop-down" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+      <Calendar
+        ampm={true}
+        events={appointments}
+        height={600}
+        mode={calendarMode}
+        style={styles.calendar}
+        eventCellStyle={styles.eventItem}
+        onPressEvent={(event) => router.push(`/calendar/${event.id}`)}
+        headerContainerStyle={{ backgroundColor: 'black' }}
+        theme={{
+          palette: {
+            primary: {
+              main: '#fff',
+            },
+            secondary: {
+              main: '#000',
+            },
+          },
+          typography: {
+            fontFamily: 'courier',
+          },
+        }}
+        // Update this if necessary to fit your `Calendar` component's API
+        activeDate={currentDate} 
+      />
       <View style={styles.buttonContainer}>
-        <CustomButton title="add appointment" onPress={handleAddAppointment} />
-        
+        <TouchableOpacity onPress={handleAddAppointment} style={styles.button}>
+          <Text style={styles.buttonText}>Add Appointment</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleCalendarMode} style={[styles.button, { marginLeft: 10 }]}>
+          <Text style={styles.buttonText}>view: {calendarMode}</Text>
+        </TouchableOpacity>
       </View>
       <AddAppointmentModal visible={modalVisible} onClose={closeModal} />
+      <CalendarListModal
+        visible={calendarListModalVisible}
+        onClose={() => setCalendarListModalVisible(false)}
+        onSelectDate={handleSelectDate}
+      />
     </SafeAreaView>
   );
 };
@@ -224,6 +134,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
+    justifyContent: 'space-between', // Pushes buttonContainer to the bottom
   },
   loadingContainer: {
     flex: 1,
@@ -231,55 +142,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  headerButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  navButton: {
+    padding: 10,
+  },
+  headerButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'courier',
+  },
   eventItem: {
-    backgroundColor: 'black',
+    backgroundColor: '#3b3b3b',
     borderColor: 'white',
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
-    marginRight: 10,
-    marginTop: 17,
-  },
-  eventTitle: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'Courier',
-  },
-  eventTime: {
-    color: 'white',
-    fontSize: 14,
+    justifyContent: 'center',
   },
   buttonContainer: {
+    flexDirection: 'row', // Align buttons horizontally
+    justifyContent: 'center', // Center buttons horizontally
+    paddingBottom: 20,
+    marginTop:10
+  },
+  button: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'white',
+    backgroundColor: 'black',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'courier',
+    textAlign: 'center',
+  },
+  selectDateButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    margin: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 5,
+    backgroundColor: 'black',
+  },
+  selectDateText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'courier',
+    marginRight: 10,
   },
   calendar: {
     backgroundColor: 'black',
   },
-  calendarList: {
-    backgroundColor: 'black',
-  },
-  toggleContainer: {
-    alignItems:"flex-end",
-    
-    marginBottom:10,
-  },
-  toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: 'black',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'white',
-    color:"white",
-    
-  },
-  toggleButtonText: {
-    color: 'white',
-    fontSize: 14,
+  eventText: {
+    color: 'black',
     fontWeight: 'bold',
-    fontFamily:"courier"
   },
 });
 

@@ -27,6 +27,7 @@ const AppointmentDetails = () => {
     location: '',
     depositPaid: false,
     clientId: '',
+    notes:[]
   });
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
@@ -44,7 +45,9 @@ const AppointmentDetails = () => {
         location: fetchedAppointment.location || '',
         depositPaid: fetchedAppointment.depositPaid,
         clientId: fetchedAppointment.client?.id || '',
+        notes:fetchedAppointment.notes || '',
       });
+      console.log(fetchedAppointment.notes)
     } catch (err) {
       setError('Failed to fetch appointment');
     } finally {
@@ -108,7 +111,7 @@ const AppointmentDetails = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="white" />
       </View>
     );
   }
@@ -132,16 +135,27 @@ const AppointmentDetails = () => {
       <Text style={styles.time}>
         {formattedStartTime} - {formattedEndTime}
       </Text>
-      <Text style={styles.location}>Location: {appointment.location}</Text>
-      <Text style={styles.client}>Client: {appointment.client?.fullName || 'Unknown'}</Text>
+      <Text style={styles.location}>location: {appointment.location}</Text>
+      <Text style={styles.client}>client: {appointment.client?.fullName || 'Unknown'}</Text>
       <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Deposit Paid: {depositPaid ? 'Yes' : 'No'}</Text>
+        <Text style={styles.switchLabel}>deposit paid: {depositPaid ? 'Yes' : 'No'}</Text>
         <Switch
           value={depositPaid}
           onValueChange={handleToggle}
           thumbColor={depositPaid ? 'black' : 'white'}
           trackColor={{ false: 'black', true: 'white' }}
         />
+        
+      </View>
+      <View style={styles.notesContainer}>
+        <Text style={styles.notesTitle}>Notes:</Text>
+        {appointment.notes.length > 0 ? (
+          appointment.notes.map((note, index) => (
+            <Text key={index} style={styles.noteItem}>{note}</Text>
+          ))
+        ) : (
+          <Text style={styles.noNotes}>No notes available</Text>
+        )}
       </View>
 
       <ReferenceImages appointmentId={appointmentId} />
@@ -227,6 +241,13 @@ const AppointmentDetails = () => {
                 value={formData.location}
                 onChangeText={(text) => setFormData({ ...formData, location: text })}
               />
+              <Text style = {styles.label}>notes:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="notes"
+                value={formData.notes}
+                onChangeText={(text) => setFormData({ ...formData, notes: [] })}
+              />
 
               <View style={styles.modalButtonContainer}>
                 <CustomButton
@@ -260,6 +281,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor:"black"
   },
   errorContainer: {
     flex: 1,
@@ -376,6 +398,29 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: 'black',
     color: 'white',
+  },
+  notesContainer: {
+    marginTop: 20,
+  },
+  notesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    fontFamily: 'courier',
+    marginBottom: 10,
+  },
+  noteItem: {
+    fontSize: 16,
+    color: 'white',
+    fontFamily: 'courier',
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  noNotes: {
+    fontSize: 16,
+    color: 'grey',
+    fontFamily: 'courier',
+    paddingHorizontal: 10,
   },
   
   image: {

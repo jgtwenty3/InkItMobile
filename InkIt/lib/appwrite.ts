@@ -183,10 +183,6 @@ export async function createAppointment(form: {
   }
 }
 
-
-
-
-
 export async function createToDoListItem(form: { item: string }) {
   try {
     const currentUser = await getCurrentUser();
@@ -531,104 +527,44 @@ export async function getUserImages(userId:string){
   }
 }
 
-// export async function updateReferenceImage(
-//   referenceImageId: string,
-//   form: {
-//     imageFile?: File; // Optional new file object
-//     clientId?: string;
-//     appointmentId?: string;
-//   }
-// ) {
-//   try {
-//     const updateFields = {};
+export async function updateUser(userId: string, form: {
+  email?: string;
+  username?: string;
+  name?:string;
+  googleId?:string;
+  accessToken:string;
+  refreshToken:string;
+  
+}) {
+  try {
+    // Fetch the current user document from the database
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User not found");
 
-//     if (form.imageFile) {
-//       // Upload the new image file
-//       const uploadedFile = await uploadFile(form.imageFile);
+    // Update account details if email or username is provided
+    if (form.email || form.username) {
+      
+      await account.updateName(form.username || currentUser.username);
+    }
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId,
+      {
+       
+        username: form.username || currentUser.username,
+        name:form.name,
+        googleId:form.googleId,
+        accessToken:form.accessToken,
+        refreshToken:form.refreshToken
+      
+      }
+    );
 
-//       // Set update fields
-//       updateFields['imageId'] = uploadedFile.$id;
-//       updateFields['imageUrl'] = uploadedFile.$getUrl(); // Get URL if needed
-//     }
+    return updatedUser;
+  } catch (error) {
+    console.error('Failed to update user:', error);
+    throw new Error('Failed to update user: ' + error.message);
+  }
+}
 
-//     // Update the reference image document
-//     const updatedRefImage = await databases.updateDocument(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.referenceImages,
-//       referenceImageId,
-//       {
-//         ...updateFields,
-//         client: form.clientId,
-//         appointment: form.appointmentId
-//       }
-//     );
-
-//     return updatedRefImage;
-//   } catch (error) {
-//     console.error('Failed to update reference image:', error);
-//     throw new Error('Failed to update reference image: ' + error.message);
-//   }
-// }
-
-// export async function getReferenceImageById(referenceImageId: string) {
-//   try {
-//     const referenceImage = await databases.getDocument(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.referenceImages,
-//       referenceImageId
-//     );
-//     return referenceImage;
-//   } catch (error) {
-//     console.error('Failed to fetch reference image:', error);
-//     throw new Error('Failed to fetch reference image');
-//   }
-// }
-
-// export async function deleteReferenceImage(referenceImageId: string) {
-//   try {
-//     // Fetch the document first to get the imageId
-//     const refImage = await getReferenceImageById(referenceImageId);
-
-//     // Delete the image file from storage
-//     if (refImage.imageId) {
-//       await storage.deleteFile(appwriteConfig.storageId, refImage.imageId);
-//     }
-
-//     // Delete the reference image document
-//     await databases.deleteDocument(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.referenceImages,
-//       referenceImageId
-//     );
-
-//     return { success: true };
-//   } catch (error) {
-//     console.error('Failed to delete reference image:', error);
-//     throw new Error('Failed to delete reference image: ' + error.message);
-//   }
-// }
-
-// export async function getUserReferenceImages(userId: string) {
-//   try {
-//     const refImages = await databases.listDocuments(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.referenceImages,
-//       [Query.equal("creator", userId)]
-//     );
-//     return refImages.documents;
-//   } catch (error) {
-//     console.error('Failed to get user reference images:', error);
-//     throw new Error('Failed to get user reference images');
-//   }
-// }
-// export const getClientReferenceImages = async (clientId: string) => {
-//   try {
-//     const response = await databases.listDocuments(appwriteConfig.databaseId, appwriteConfig.collectionId, [
-//       Query.equal('clientId', clientId),
-//     ]);
-//     return response.documents; // Returns an array of images
-//   } catch (error) {
-//     console.error('Error fetching client reference images:', error);
-//     throw new Error('Failed to fetch client reference images');
-//   }
-// };

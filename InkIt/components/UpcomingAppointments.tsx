@@ -35,7 +35,7 @@ const UpcomingAppointments = () => {
   }, [user]);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="white" />;
   }
 
   if (error) {

@@ -4,17 +4,23 @@ import { useGlobalContext } from '@/app/context/GlobalProvider';
 import CustomButton from '@/components/CustomButton';
 import { signOut } from '@/lib/appwrite';
 import { router } from 'expo-router';
+import { useGoogleAuth } from '@/lib/GoogleAuth';
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  
+  const { promptAsync } = useGoogleAuth(); // Use the hook here
 
   const logout = async () => {
     await signOut();
     setUser(null);
     setIsLogged(false);
-
     router.replace('/SignIn');
+  };
+
+  const handleGoogleLogin = async () => {
+    if (promptAsync) {
+      await promptAsync();
+    }
   };
 
   return (
@@ -26,6 +32,7 @@ const Profile = () => {
       </View>
       <View style={styles.buttonContainer}>
         <CustomButton title="Log out" onPress={logout} />
+        <CustomButton title="Log in with Google" onPress={handleGoogleLogin} />
       </View>
     </SafeAreaView>
   );
