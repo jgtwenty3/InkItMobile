@@ -16,6 +16,7 @@ const AddClient = () => {
     state: '',
     country: '',
     waiverSigned: false,
+    notes:''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,55 +48,57 @@ const AddClient = () => {
       state: '',
       country: '',
       waiverSigned: false,
+      notes:''
     });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Add New Client</Text>
+      <Text style={styles.title}>add new client</Text>
       <View style={styles.formContainer}>
         <FormField
-          title="Full Name"
+          title="full name"
           value={form.fullName}
           handleChangeText={(text) => setForm({ ...form, fullName: text })}
-          placeholder="Enter full name"
+          placeholder="nter full name"
           otherStyles={styles.formField}
         />
         <FormField
-          title="Email"
+          title="email"
           value={form.email}
           handleChangeText={(text) => setForm({ ...form, email: text })}
-          placeholder="Enter email"
+          placeholder="enter email"
           otherStyles={styles.formField}
         />
         <FormField
-          title="Phone Number"
+          title="phone number"
           value={form.phoneNumber}
           handleChangeText={(text) => setForm({ ...form, phoneNumber: text })}
-          placeholder="Enter phone number"
+          placeholder="enter phone #"
           otherStyles={styles.formField}
         />
         <FormField
-          title="City"
+          title="city"
           value={form.city}
           handleChangeText={(text) => setForm({ ...form, city: text })}
-          placeholder="Enter city"
+          placeholder="enter city"
           otherStyles={styles.formField}
         />
         <FormField
-          title="State"
+          title="state"
           value={form.state}
           handleChangeText={(text) => setForm({ ...form, state: text })}
-          placeholder="Enter state"
+          placeholder="enter state"
           otherStyles={styles.formField}
         />
         <FormField
-          title="Country"
+          title="country"
           value={form.country}
           handleChangeText={(text) => setForm({ ...form, country: text })}
-          placeholder="Enter country"
+          placeholder="enter country"
           otherStyles={styles.formField}
         />
+       
         <View style={styles.toggleContainer}>
           <Text style={styles.toggleLabel}>Waiver Signed:</Text>
           <Switch

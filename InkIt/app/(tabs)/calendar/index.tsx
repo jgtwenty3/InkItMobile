@@ -110,11 +110,11 @@ const CalendarScreen = () => {
           },
         }}
         // Update this if necessary to fit your `Calendar` component's API
-        activeDate={currentDate} 
+        date={currentDate} 
       />
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleAddAppointment} style={styles.button}>
-          <Text style={styles.buttonText}>Add Appointment</Text>
+          <Text style={styles.buttonText}>add appointment</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleCalendarMode} style={[styles.button, { marginLeft: 10 }]}>
           <Text style={styles.buttonText}>view: {calendarMode}</Text>
