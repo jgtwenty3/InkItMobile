@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ActivityIndicator, SafeAreaView, TouchableOpacity, Text } from 'react-native';
 import moment from 'moment-timezone';
-import CustomButton from '@/components/CustomButton';
 import { getUserAppointments } from '@/lib/appwrite';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { router } from 'expo-router';
@@ -9,6 +8,7 @@ import AddAppointmentModal from '@/components/AddAppointmentModal';
 import CalendarListModal from '@/components/CalendarListModal';
 import { Calendar } from 'react-native-big-calendar';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import fetchGoogleCalendarData from '@/lib/Google/FetchGCal';
 
 const CalendarScreen = () => {
   const { user } = useGlobalContext();
@@ -31,6 +31,7 @@ const CalendarScreen = () => {
             start: moment.utc(appointment.startTime).local().toDate(),
             end: moment.utc(appointment.endTime).local().toDate(),
           }));
+          
 
           setAppointments(formattedAppointments);
         } else {
@@ -87,6 +88,7 @@ const CalendarScreen = () => {
           <Icon name="arrow-drop-down" size={24} color="white" />
         </TouchableOpacity>
       </View>
+      <View style = {styles.calendarContainer}>
       <Calendar
         ampm={true}
         events={appointments}
@@ -112,6 +114,8 @@ const CalendarScreen = () => {
         // Update this if necessary to fit your `Calendar` component's API
         date={currentDate} 
       />
+      </View>
+      
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleAddAppointment} style={styles.button}>
           <Text style={styles.buttonText}>add appointment</Text>
@@ -206,6 +210,10 @@ const styles = StyleSheet.create({
   },
   calendar: {
     backgroundColor: 'black',
+  },
+  calendarContainer:{
+    margin:10
+
   },
   eventText: {
     color: 'black',

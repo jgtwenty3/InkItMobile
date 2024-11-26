@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "icon": "",
     "scheme": "inkit",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "",
@@ -14,13 +19,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "package": "com.inkit.inkit"
+      "bundleIdentifier": "com.inkit.inkit"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.inkit.inkit"
     },
     "web": {
       "bundler": "metro",
@@ -28,13 +34,19 @@
       "favicon": ""
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
     },
-    "expo": {
-      "scheme": "mycoolredirect"
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a34bc0ac-f70c-4082-b7cb-46c9701f775c"
+      }
     }
   }
 }

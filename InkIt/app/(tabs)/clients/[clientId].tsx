@@ -108,18 +108,18 @@ const ClientDetails = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
         <View style={styles.innerContainer}>
-          <Text style={styles.clientText}>Full Name: {client.fullName}</Text>
-          <Text style={styles.clientText}>Email: {client.email}</Text>
-          <Text style={styles.clientText}>Phone Number: {client.phoneNumber}</Text>
-          <Text style={styles.clientText}>City: {client.city}</Text>
-          <Text style={styles.clientText}>State: {client.state}</Text>
-          <Text style={styles.clientText}>Country: {client.country}</Text>
-          <Text style={styles.clientText}>Waiver Signed: {client.waiverSigned ? 'Yes' : 'No'}</Text>
-          <Text style={styles.clientText}>Last Appointment:</Text>
-          <Text style={styles.clientText}>Next Appointment:</Text>
+          <Text style={styles.clientText}>full name: {client.fullName}</Text>
+          <Text style={styles.clientText}>email: {client.email}</Text>
+          <Text style={styles.clientText}>phone number: {client.phoneNumber}</Text>
+          <Text style={styles.clientText}>city: {client.city}</Text>
+          <Text style={styles.clientText}>state: {client.state}</Text>
+          <Text style={styles.clientText}>country: {client.country}</Text>
+          <Text style={styles.clientText}>waiver signed: {client.waiverSigned ? 'Yes' : 'No'}</Text>
+          <Text style={styles.clientText}>last appointment:</Text>
+          <Text style={styles.clientText}>next appointment:</Text>
         </View>
         <View>
-          <Text style={styles.notesTitle}>Notes:</Text>
+          <Text style={styles.notesTitle}>notes:</Text>
           <FlatList
             data={client.notes}
             keyExtractor={(item, index) => `${item}-${index}`}
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    
     backgroundColor: 'black', // Optional: match background color
   },
   button: {

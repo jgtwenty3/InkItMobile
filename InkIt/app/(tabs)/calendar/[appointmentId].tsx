@@ -6,7 +6,7 @@ import { getAppointmentById, updateAppointment, deleteAppointment, getUserClient
 import moment from 'moment';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
-import { formatDateString, multiFormatDateString } from '@/utils/utils';
+import { formatDateString,  } from '@/utils/utils';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import ReferenceImages from '@/components/ReferenceImages';
@@ -150,7 +150,7 @@ const AppointmentDetails = () => {
       <View style={styles.notesContainer}>
         <Text style={styles.notesTitle}>Notes:</Text>
         {appointment.notes.length > 0 ? (
-          appointment.notes.map((note, index) => (
+          appointment.notes.map((note: string, index) => (
             <Text key={index} style={styles.noteItem}>{note}</Text>
           ))
         ) : (

@@ -12,7 +12,7 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
     state: '',
     country: '',
     waiverSigned: false,
-    notes: '',
+    notes: [],
   });
 
   useEffect(() => {
@@ -25,7 +25,6 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
         state: client.state || '',
         country: client.country || '',
         waiverSigned: client.waiverSigned || false,
-        notes: client.notes || '',
       });
     }
   }, [client]);
@@ -85,6 +84,7 @@ const EditClientModal = ({ client, visible, onClose, onSave }: { client: any; vi
             onChangeText={(text) => handleChange('country', text)}
             placeholder="Country"
           />
+           
           <View style={styles.toggleContainer}>
             <Text style={styles.toggleLabel}>Waiver Signed:</Text>
             <Switch

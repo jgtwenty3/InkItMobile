@@ -56,6 +56,7 @@ const SignIn = () => {
           <FormField
             title="password"
             value={form.password}
+            secureTextEntry
             handleChangeText={(e) => setForm({ ...form, password: e })}
             placeholder="enter your password" 
             otherStyles={{ marginTop: 28 }}

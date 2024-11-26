@@ -98,6 +98,13 @@ const AddClient = () => {
           placeholder="enter country"
           otherStyles={styles.formField}
         />
+        <FormField
+        title = "notes"
+        value = {form.notes}
+        handleChangeText={(text) => setForm({ ...form, notes: text })}
+        placeholder = "enter client notes"
+        otherStyles={styles.formField}
+        />
        
         <View style={styles.toggleContainer}>
           <Text style={styles.toggleLabel}>Waiver Signed:</Text>
@@ -139,7 +146,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'Courier',
     color: 'white',
-    fontSize: Platform.OS === 'ios' ? 24 : 20, // Adjust font size for tablet and mobile
+    fontSize: Platform.OS === 'ios' ? 18 : 22, // Adjust font size for tablet and mobile
     marginBottom: 20,
   },
   formContainer: {

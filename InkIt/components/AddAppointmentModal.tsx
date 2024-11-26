@@ -112,7 +112,7 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.label}>Type of Appointment:</Text>
+          <Text style={styles.label}>type of appointment:</Text>
           <TextInput
             style={styles.input}
             placeholder="Consultation, Tattoo, etc."
@@ -128,6 +128,7 @@ const AddAppointmentModal = ({ visible, onClose,  }) => {
           {showStartPicker && (
             <DateTimePicker
               value={startTime}
+              style = {styles.datePicker}
               mode="datetime"
               is24Hour={true}
               display="default"

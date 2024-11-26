@@ -20,13 +20,13 @@ const SignUp = () => {
   });
 
   const submit = async () => {
-    if (form.username === "" || form.email === "" || form.password === "") {
+    if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
     }
 
     setSubmitting(true);
     try {
-      const result = await createUser(form.email, form.password, form.username);
+      const result = await createUser(form.email, form.password);
       // setUser(result);
       // setIsLogged(true);
       
@@ -61,6 +61,7 @@ const SignUp = () => {
             title="password"
             value={form.password}
             placeholder="enter your password"
+            secureTextEntry
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles={styles.mt7}
           />

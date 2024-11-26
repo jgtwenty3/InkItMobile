@@ -1,4 +1,4 @@
-import { Account, Avatars, Client, Databases, ID, ImageGravity, Query, Storage, Models } from "react-native-appwrite";
+import { Account, Avatars, Client, Databases, ID, Query, Storage, } from "react-native-appwrite";
 
 export const appwriteConfig = {
   endpoint: "https://cloud.appwrite.io/v1",
@@ -27,18 +27,18 @@ export const storage = new Storage(client);
 
 
 
-export async function createUser(email: string, password: string, username: string) {
+export async function createUser(email: string, password: string,) {
   try {
     const newAccount = await account.create(
       ID.unique(),
       email,
       password,
-      username
+      
     );
 
     if (!newAccount) throw new Error("Failed to create account");
 
-    const avatarUrl = avatars.getInitials(username);
+   
 
     await signIn(email, password);
 
@@ -49,7 +49,7 @@ export async function createUser(email: string, password: string, username: stri
       {
         accountId: newAccount.$id,
         email: email,
-        username: username,
+        
         
       }
     );
@@ -252,7 +252,7 @@ export async function createClient(form: {
   state: string;
   country: string;
   waiverSigned:boolean
-  notes:[];
+  notes:string[];
 }) {
   try {
     //  get the current user to associate the client with the logged-in user
@@ -377,7 +377,7 @@ export async function updateClient(clientId: string, form: {
   state: string;
   country: string;
   waiverSigned:boolean,
-  notes:[]
+  notes?:string[]
 }) {
   try {
     // Update the client document in the database
@@ -530,34 +530,32 @@ export async function getUserImages(userId:string){
 export async function updateUser(userId: string, form: {
   email?: string;
   username?: string;
-  name?:string;
-  googleId?:string;
-  accessToken:string;
-  refreshToken:string;
-  
+  name?: string;
+  googleId?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }) {
   try {
-    // Fetch the current user document from the database
+    // Fetch the current user document from the database (if needed)
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
 
     // Update account details if email or username is provided
     if (form.email || form.username) {
-      
       await account.updateName(form.username || currentUser.username);
     }
+
+    // Update the document in the database
     const updatedUser = await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      userId,
+      appwriteConfig.databaseId, // Ensure this is the correct database ID
+      appwriteConfig.userCollectionId, // Ensure this is the correct collection ID
+      userId, // This should be the document ID (userId)
       {
-       
         username: form.username || currentUser.username,
-        name:form.name,
-        googleId:form.googleId,
-        accessToken:form.accessToken,
-        refreshToken:form.refreshToken
-      
+        name: form.name,
+        googleId: form.googleId,
+        accessToken: form.accessToken,
+        refreshToken: form.refreshToken,
       }
     );
 

@@ -4,9 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import ToDoList from '@/components/ToDoList';
 import UpcomingAppointments from '@/components/UpcomingAppointments';
+import * as Linking from "expo-linking"
 
 const Home = () => {
   const navigation = useNavigation();
+  const url = Linking.createURL('/--/');
+  console.log(url)
   
   return (
     <SafeAreaView style={styles.container}>

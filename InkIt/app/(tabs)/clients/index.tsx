@@ -7,6 +7,7 @@ import CustomButton from '@/components/CustomButton';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import { getUserClients } from '@/lib/appwrite';
 import { Link } from 'expo-router';
+import AddClientModal from '@/components/AddClientModal';
 
 const Clients = () => {
   const { user } = useGlobalContext();
@@ -19,6 +20,7 @@ const Clients = () => {
   const [cities, setCities] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const navigation = useNavigation();
+  const [clientModal, setClientModal] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -63,6 +65,14 @@ const Clients = () => {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+  
+  const openClientModal = () => {
+    setClientModal(true);
+  };
+
+  const closeClientModal = () => {
+    setClientModal(false);
+  };
 
   const handleCityFilterChange = (city: string) => {
     setSelectedCities(prev => {
@@ -102,73 +112,77 @@ const Clients = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.searchFilterContainer}>
-          <SearchBar
-            placeholder="search name..."
-            onChangeText={handleSearch}
-            value={searchQuery}
-            containerStyle={styles.searchBarContainer}
-            inputContainerStyle={styles.searchBarInputContainer}
-            inputStyle={styles.searchBarInput}
-          />
-          <TouchableOpacity onPress={openFilterModal} style={styles.filterButton}>
-            <Text style={styles.filterButtonText}>city filter</Text>
-          </TouchableOpacity>
+  <View style={styles.searchFilterContainer}>
+    <SearchBar
+      placeholder="search name..."
+      onChangeText={handleSearch}
+      value={searchQuery}
+      containerStyle={styles.searchBarContainer}
+      inputContainerStyle={styles.searchBarInputContainer}
+      inputStyle={styles.searchBarInput}
+    />
+    <TouchableOpacity onPress={openFilterModal} style={styles.filterButton}>
+      <Text style={styles.filterButtonText}>city filter</Text>
+    </TouchableOpacity>
+  </View>
+  <ScrollView style={styles.innerContainer}>
+    {filteredClients.length > 0 ? (
+      filteredClients.map((client: any) => (
+        <View key={client.$id} style={styles.clientCard}>
+          <Text style={styles.clientText}>{client.fullName}</Text>
+          <Text style={styles.clientText}>{client.email}</Text>
+          <Text style={styles.clientText}>{client.city}, {client.state}</Text>
+          <Link href={`/clients/${client.$id}`} style={styles.detailsText}>More...</Link>
         </View>
-      <ScrollView style={styles.innerContainer}>
-        
-        {filteredClients.length > 0 ? (
-          filteredClients.map((client: any) => (
-            <View key={client.$id} style={styles.clientCard}>
-              <Text style={styles.clientText}>{client.fullName}</Text>
-              <Text style={styles.clientText}>{client.email}</Text>
-              <Text style={styles.clientText}>{client.city}, {client.state}</Text>
-              <Link href={`/clients/${client.$id}`} style={styles.detailsText}>More...</Link>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.noClientsText}>No clients found</Text>
-        )}
-      </ScrollView>
-      <View>
+      ))
+    ) : (
+      <Text style={styles.noClientsText}>no clients found</Text>
+    )}
+  </ScrollView>
+  <View>
+    <CustomButton
+      title="add new client"
+      onPress={openClientModal}
+      buttonStyle={styles.mt20}
+    />
+  </View>
+  {/* AddClientModal for Adding Clients */}
+  <AddClientModal
+    visible={clientModal}
+    onClose={closeClientModal} // Ensure this closes the modal
+  />
+  {/* Filter Modal */}
+  <Modal
+    transparent={true}
+    visible={modalVisible}
+    animationType="slide"
+    onRequestClose={closeFilterModal}
+  >
+    <SafeAreaView style={styles.modalContainer}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>Select Cities</Text>
+        {cities.map(city => (
+          <TouchableOpacity
+            key={city}
+            onPress={() => handleCityFilterChange(city)}
+            style={styles.modalOption}
+          >
+            <Text style={styles.modalOptionText}>
+              {city}
+              {selectedCities.has(city) ? ' (Selected)' : ''}
+            </Text>
+          </TouchableOpacity>
+        ))}
         <CustomButton
-          title="Add a New Client"
-          onPress={() => navigation.navigate('AddClient')} 
+          title="Close"
+          onPress={closeFilterModal}
           buttonStyle={styles.mt20}
         />
       </View>
-
-      {/* Filter Modal */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={closeFilterModal}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Cities</Text>
-            {cities.map(city => (
-              <TouchableOpacity
-                key={city}
-                onPress={() => handleCityFilterChange(city)}
-                style={styles.modalOption}
-              >
-                <Text style={styles.modalOptionText}>
-                  {city}
-                  {selectedCities.has(city) ? ' (Selected)' : ''}
-                </Text>
-              </TouchableOpacity>
-            ))}
-            <CustomButton
-              title="Close"
-              onPress={closeFilterModal}
-              buttonStyle={styles.mt20}
-            />
-          </View>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
+  </Modal>
+</SafeAreaView>
+
   );
 };
 
@@ -248,6 +262,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
+    fontFamily:'courier'
   },
   mt20: {
     marginTop: 20,

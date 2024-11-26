@@ -19,9 +19,9 @@ export default function App() {
         source={require('../assets/images/inkit.png')}
         style={styles.image}
       />
-      <StatusBar/>
-      <CustomButton title = "Login"   onPress={()=>router.push("/SignIn")}/>
-      <CustomButton title = "Sign Up"  onPress={()=>router.push("/SignUp")}/>
+      <StatusBar />
+      <CustomButton title = "login"   onPress={()=>router.push("/SignIn")}/>
+      <CustomButton title = "sign up"  onPress={()=>router.push("/SignUp")}/>
       
     </SafeAreaView>
   );

@@ -1,14 +1,15 @@
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, FlatList } from 'react-native';
 import React from 'react';
 import { useGlobalContext } from '@/app/context/GlobalProvider';
 import CustomButton from '@/components/CustomButton';
 import { signOut } from '@/lib/appwrite';
 import { router } from 'expo-router';
-import { useGoogleAuth } from '@/lib/GoogleAuth';
+import useGoogleLogin from '@/lib/Google/GoogleAuth';
+import { updateUser } from '@/lib/appwrite';
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  const { promptAsync } = useGoogleAuth(); // Use the hook here
+  const promptGoogleLogin = useGoogleLogin(); // Call hook inside functional component
 
   const logout = async () => {
     await signOut();
@@ -18,21 +19,20 @@ const Profile = () => {
   };
 
   const handleGoogleLogin = async () => {
-    if (promptAsync) {
-      await promptAsync();
-    }
+    await promptGoogleLogin();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>{user.username}'s Profile</Text>
+        <Text style={styles.header}>{user.username}'s profile</Text>
         <Text style={styles.text}>{user.email}</Text>
         <CustomButton title="edit profile" onPress={() => router.push('profile/EditProfile')} />
       </View>
+      
       <View style={styles.buttonContainer}>
-        <CustomButton title="Log out" onPress={logout} />
-        <CustomButton title="Log in with Google" onPress={handleGoogleLogin} />
+        <CustomButton title="log out" onPress={logout} />
+        <CustomButton title="google login" onPress={handleGoogleLogin} />
       </View>
     </SafeAreaView>
   );
@@ -65,8 +65,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 16,
-    width: '50%', // Adjust the width as needed
-    alignSelf: 'center', // Center the button container horizontally
-    marginBottom: 16, // Add space from the bottom
+    width: '50%',
+    alignSelf: 'center',
+    marginBottom: 16, 
+   
+    justifyContent:'space-between'
   },
 });
