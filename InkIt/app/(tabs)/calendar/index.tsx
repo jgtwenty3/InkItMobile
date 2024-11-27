@@ -17,8 +17,9 @@ const CalendarScreen = () => {
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarMode, setCalendarMode] = useState('3days'); // Default mode
-  const [currentDate, setCurrentDate] = useState(moment().startOf('month').toDate());
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarListModalVisible, setCalendarListModalVisible] = useState(false);
+
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -69,14 +70,16 @@ const CalendarScreen = () => {
     setCalendarMode(modes[nextModeIndex]);
   };
 
-  const changeMonth = (direction) => {
-    const newDate = moment(currentDate).add(direction, 'month').toDate();
-    setCurrentDate(newDate);
-  };
+  // const changeMonth = (direction) => {
+  //   const newDate = moment(currentDate).add(direction, 'month').toDate();
+  //   setCurrentDate(newDate);
+  // };
 
   const handleSelectDate = (selectedDate) => {
     setCurrentDate(moment(selectedDate).toDate());
   };
+  const today = new Date().toISOString().split('T')[0];
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,6 +96,7 @@ const CalendarScreen = () => {
         ampm={true}
         events={appointments}
         height={600}
+        date ={today}
         mode={calendarMode}
         style={styles.calendar}
         eventCellStyle={styles.eventItem}
